@@ -18,9 +18,11 @@ class Job4jCarsApplicationTests {
     }
 
     @Test
-    void whenApplicationStartsThenLiquibaseCreatesCarsTable() {
-        Integer count = jdbcTemplate.queryForObject("select count(*) from cars", Integer.class);
+    void whenApplicationStartsThenLiquibaseCreatesAutoUserAndAutoPostTables() {
+        Integer usersCount = jdbcTemplate.queryForObject("select count(*) from auto_user", Integer.class);
+        Integer postsCount = jdbcTemplate.queryForObject("select count(*) from auto_post", Integer.class);
 
-        assertThat(count).isZero();
+        assertThat(usersCount).isZero();
+        assertThat(postsCount).isZero();
     }
 }

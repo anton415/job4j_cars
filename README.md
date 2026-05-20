@@ -49,4 +49,4 @@ Password:
 mvn test
 ```
 
-Liquibase changelog находится в `src/main/resources/db/changelog/db.changelog-master.yaml`.
+Liquibase changelog находится в `db/dbchangelog.xml`, SQL-скрипты находятся в `db/scripts`.
