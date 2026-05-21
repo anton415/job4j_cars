@@ -22,7 +22,7 @@ class Job4jCarsApplicationTests {
         Integer usersCount = jdbcTemplate.queryForObject("select count(*) from auto_user", Integer.class);
         Integer postsCount = jdbcTemplate.queryForObject("select count(*) from auto_post", Integer.class);
 
-        assertThat(usersCount).isZero();
+        assertThat(usersCount).isEqualTo(3);
         assertThat(postsCount).isZero();
     }
 }
