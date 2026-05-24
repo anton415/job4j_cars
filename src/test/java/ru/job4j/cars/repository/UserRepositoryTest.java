@@ -38,8 +38,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("Create assigns generated id")
-    void whenCreateThenUserHasId() {
+    @DisplayName("Create saves user with generated id")
+    void whenCreateThenSavedUserHasId() {
         var user = createUser(uniqueLogin(), "password");
 
         assertThat(user.getId()).isNotNull();
@@ -127,8 +127,9 @@ class UserRepositoryTest {
         user.setLogin(login);
         user.setPassword(password);
         repository.create(user);
-        createdUserIds.add(user.getId());
-        return user;
+        var createdUser = repository.findByLogin(login).orElseThrow();
+        createdUserIds.add(createdUser.getId());
+        return createdUser;
     }
 
     private String uniqueLogin() {

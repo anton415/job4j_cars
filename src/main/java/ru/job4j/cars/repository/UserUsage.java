@@ -17,6 +17,7 @@ public class UserUsage {
             user.setLogin("admin");
             user.setPassword("admin");
             userRepository.create(user);
+            user = userRepository.findByLogin(user.getLogin()).orElseThrow();
             userRepository.findAllOrderById()
                     .forEach(System.out::println);
             userRepository.findByLikeLogin("e")

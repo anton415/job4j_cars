@@ -18,20 +18,18 @@ public class UserRepository {
     /**
      * Сохранить в базе.
      * @param user пользователь.
-     * @return пользователь с id.
+     * @return пользователь.
      */
     public User create(User user) {
         Transaction transaction = null;
         try (var session = sf.openSession()) {
             transaction = session.beginTransaction();
             session.createMutationQuery(
-                            "insert into User (login, password) "
-                                    + "values (:login, :password)")
+                            "INSERT INTO User (login, password) "
+                                    + "VALUES (:login, :password)")
                     .setParameter("login", user.getLogin())
                     .setParameter("password", user.getPassword())
                     .executeUpdate();
-            findByLogin(user.getLogin(), session)
-                    .ifPresent(createdUser -> user.setId(createdUser.getId()));
             transaction.commit();
         } catch (Exception exception) {
             if (transaction != null) {
@@ -51,8 +49,8 @@ public class UserRepository {
         try (var session = sf.openSession()) {
             transaction = session.beginTransaction();
             session.createMutationQuery(
-                            "update User u set u.login = :login, u.password = :password "
-                                    + "where u.id = :userId")
+                            "UPDATE User u SET u.login = :login, u.password = :password "
+                                    + "WHERE u.id = :userId")
                     .setParameter("login", user.getLogin())
                     .setParameter("password", user.getPassword())
                     .setParameter("userId", user.getId())
@@ -74,7 +72,7 @@ public class UserRepository {
         Transaction transaction = null;
         try (var session = sf.openSession()) {
             transaction = session.beginTransaction();
-            session.createMutationQuery("delete from User u where u.id = :userId")
+            session.createMutationQuery("DELETE FROM User u WHERE u.id = :userId")
                     .setParameter("userId", userId)
                     .executeUpdate();
             transaction.commit();
@@ -92,7 +90,7 @@ public class UserRepository {
      */
     public List<User> findAllOrderById() {
         try (var session = sf.openSession()) {
-            return session.createQuery("from User u order by u.id", User.class)
+            return session.createQuery("FROM User u ORDER BY u.id", User.class)
                     .list();
         }
     }
@@ -103,7 +101,7 @@ public class UserRepository {
      */
     public Optional<User> findById(Integer userId) {
         try (var session = sf.openSession()) {
-            return session.createQuery("from User u where u.id = :userId", User.class)
+            return session.createQuery("FROM User u WHERE u.id = :userId", User.class)
                     .setParameter("userId", userId)
                     .uniqueResultOptional();
         }
@@ -117,7 +115,7 @@ public class UserRepository {
     public List<User> findByLikeLogin(String key) {
         try (var session = sf.openSession()) {
             return session.createQuery(
-                            "from User u where u.login like :key order by u.id", User.class)
+                            "FROM User u WHERE u.login LIKE :key ORDER BY u.id", User.class)
                     .setParameter("key", "%" + key + "%")
                     .list();
         }
@@ -136,7 +134,7 @@ public class UserRepository {
 
     private Optional<User> findByLogin(String login, Session session) {
         return session.createQuery(
-                        "from User u where u.login = :login", User.class)
+                        "FROM User u WHERE u.login = :login", User.class)
                 .setParameter("login", login)
                 .uniqueResultOptional();
     }

@@ -19,8 +19,8 @@ class Job4jCarsApplicationTests {
 
     @Test
     void whenApplicationStartsThenLiquibaseCreatesAutoUserAndAutoPostTables() {
-        Integer usersCount = jdbcTemplate.queryForObject("select count(*) from auto_user", Integer.class);
-        Integer postsCount = jdbcTemplate.queryForObject("select count(*) from auto_post", Integer.class);
+        Integer usersCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM auto_user", Integer.class);
+        Integer postsCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM auto_post", Integer.class);
 
         assertThat(usersCount).isEqualTo(3);
         assertThat(postsCount).isZero();
