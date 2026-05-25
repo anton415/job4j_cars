@@ -13,4 +13,7 @@
 
     <include file="scripts/update_004.sql"
              relativeToChangelogFile="true"/>
+
+    <include file="scripts/004_ddl_add_table_price_history.sql"
+             relativeToChangelogFile="true"/>
 </databaseChangeLog>
