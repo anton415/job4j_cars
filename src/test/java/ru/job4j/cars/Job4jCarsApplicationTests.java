@@ -30,10 +30,12 @@ class Job4jCarsApplicationTests {
         Integer usersCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM auto_user", Integer.class);
         Integer postsCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM auto_post", Integer.class);
         Integer priceHistoryCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM price_history", Integer.class);
+        Integer participatesCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM participates", Integer.class);
 
         assertThat(usersCount).isEqualTo(3);
         assertThat(postsCount).isZero();
         assertThat(priceHistoryCount).isZero();
+        assertThat(participatesCount).isZero();
     }
 
     @Test
@@ -59,5 +61,27 @@ class Job4jCarsApplicationTests {
         assertThat(savedPost.getPriceHistory())
                 .extracting(PriceHistory::getBefore)
                 .containsExactly(1_000_000L);
+    }
+
+    @Test
+    @Transactional
+    void whenSavePostThenSaveParticipates() {
+        var users = entityManager.createQuery("FROM User u ORDER BY u.id", User.class)
+                .setMaxResults(2)
+                .getResultList();
+        var post = new Post();
+        post.setDescription("Car sale post");
+        post.setUser(users.get(0));
+        post.addParticipate(users.get(1));
+
+        entityManager.persist(post);
+        entityManager.flush();
+        entityManager.clear();
+
+        var savedPost = entityManager.find(Post.class, post.getId());
+
+        assertThat(savedPost.getParticipates())
+                .extracting(User::getId)
+                .containsExactly(users.get(1).getId());
     }
 }

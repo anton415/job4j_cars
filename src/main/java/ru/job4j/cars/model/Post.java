@@ -8,6 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -44,6 +46,16 @@ public class Post {
     @EqualsAndHashCode.Exclude
     private List<PriceHistory> priceHistory = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "participates",
+            joinColumns = @JoinColumn(name = "post_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "user_id", nullable = false)
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<User> participates = new ArrayList<>();
+
     public void addPriceHistory(PriceHistory history) {
         priceHistory.add(history);
         history.setPost(this);
@@ -52,5 +64,13 @@ public class Post {
     public void removePriceHistory(PriceHistory history) {
         priceHistory.remove(history);
         history.setPost(null);
+    }
+
+    public void addParticipate(User user) {
+        participates.add(user);
+    }
+
+    public void removeParticipate(User user) {
+        participates.remove(user);
     }
 }
