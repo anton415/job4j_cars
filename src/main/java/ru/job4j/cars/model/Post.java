@@ -1,7 +1,9 @@
 package ru.job4j.cars.model;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -19,7 +21,9 @@ import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -32,7 +36,12 @@ public class Post {
     @Column(nullable = false)
     private String description;
 
-    private String photo;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "auto_post_photo", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "path", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<String> photos = new HashSet<>();
 
     @Column(nullable = false)
     private LocalDateTime created = LocalDateTime.now();
@@ -72,6 +81,14 @@ public class Post {
     public void removePriceHistory(PriceHistory history) {
         priceHistory.remove(history);
         history.setPost(null);
+    }
+
+    public void addPhoto(String photo) {
+        photos.add(photo);
+    }
+
+    public void removePhoto(String photo) {
+        photos.remove(photo);
     }
 
     public void addParticipate(User user) {

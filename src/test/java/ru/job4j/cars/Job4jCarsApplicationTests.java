@@ -39,6 +39,7 @@ class Job4jCarsApplicationTests {
         Integer ownersCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM owners", Integer.class);
         Integer historyOwnersCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM history_owners", Integer.class);
         Integer historyCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM history", Integer.class);
+        Integer postPhotoCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM auto_post_photo", Integer.class);
 
         assertThat(usersCount).isEqualTo(3);
         assertThat(postsCount).isZero();
@@ -49,6 +50,7 @@ class Job4jCarsApplicationTests {
         assertThat(ownersCount).isZero();
         assertThat(historyOwnersCount).isZero();
         assertThat(historyCount).isZero();
+        assertThat(postPhotoCount).isZero();
     }
 
     @Test

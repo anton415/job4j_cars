@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,8 +76,8 @@ class PostRepositoryTest {
     @DisplayName("Find all for last day returns recent posts only")
     void whenFindAllForLastDayThenReturnsRecentPostsOnly() {
         var carName = uniqueName("last_day_car");
-        var recent = createPost("recent", LocalDateTime.now().minusHours(2), null, carName);
-        var old = createPost("old", LocalDateTime.now().minusDays(2), null, carName);
+        var recent = createPost("recent", LocalDateTime.now().minusHours(2), Set.of(), carName);
+        var old = createPost("old", LocalDateTime.now().minusDays(2), Set.of(), carName);
 
         assertThat(postRepository.findAllLastDay())
                 .extracting(Post::getId)
@@ -87,22 +88,29 @@ class PostRepositoryTest {
     @Test
     @DisplayName("Find all with photo returns posts with photo only")
     void whenFindAllWithPhotoThenReturnsPostsWithPhotoOnly() {
-        var withPhoto = createPost("with photo", LocalDateTime.now(), "photo.jpg", uniqueName("photo_car"));
-        var withoutPhoto = createPost("without photo", LocalDateTime.now(), null, uniqueName("photo_car"));
-        var withEmptyPhoto = createPost("with empty photo", LocalDateTime.now(), "", uniqueName("photo_car"));
+        var withPhoto = createPost(
+                "with photo",
+                LocalDateTime.now(),
+                Set.of("front.jpg", "back.jpg"),
+                uniqueName("photo_car")
+        );
+        var withoutPhoto = createPost("without photo", LocalDateTime.now(), Set.of(), uniqueName("photo_car"));
+        var withEmptyPhoto = createPost("with empty photo", LocalDateTime.now(), Set.of(""), uniqueName("photo_car"));
 
         assertThat(postRepository.findAllWithPhoto())
                 .extracting(Post::getId)
                 .contains(withPhoto.getId())
                 .doesNotContain(withoutPhoto.getId(), withEmptyPhoto.getId());
+        assertThat(postRepository.findById(withPhoto.getId()).orElseThrow().getPhotos())
+                .containsExactlyInAnyOrder("front.jpg", "back.jpg");
     }
 
     @Test
     @DisplayName("Find all by car brand returns matching posts only")
     void whenFindAllByCarBrandThenReturnsMatchingPostsOnly() {
         var brand = uniqueName("brand");
-        var matching = createPost("matching", LocalDateTime.now(), null, brand);
-        var other = createPost("other", LocalDateTime.now(), null, uniqueName("brand"));
+        var matching = createPost("matching", LocalDateTime.now(), Set.of(), brand);
+        var other = createPost("other", LocalDateTime.now(), Set.of(), uniqueName("brand"));
 
         assertThat(postRepository.findAllByBrand(brand))
                 .extracting(Post::getId)
@@ -110,7 +118,7 @@ class PostRepositoryTest {
                 .doesNotContain(other.getId());
     }
 
-    private Post createPost(String description, LocalDateTime created, String photo, String carName) {
+    private Post createPost(String description, LocalDateTime created, Set<String> photos, String carName) {
         var postRef = new AtomicReference<Post>();
         crudRepository.run(session -> {
             var user = new User();
@@ -130,7 +138,7 @@ class PostRepositoryTest {
             var post = new Post();
             post.setDescription(description);
             post.setCreated(created);
-            post.setPhoto(photo);
+            post.getPhotos().addAll(photos);
             post.setUser(user);
             post.setCar(car);
             session.persist(post);
