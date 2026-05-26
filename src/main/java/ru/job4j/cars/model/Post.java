@@ -32,6 +32,8 @@ public class Post {
     @Column(nullable = false)
     private String description;
 
+    private String photo;
+
     @Column(nullable = false)
     private LocalDateTime created = LocalDateTime.now();
 
