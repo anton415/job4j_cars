@@ -19,4 +19,7 @@
 
     <include file="scripts/005_ddl_create_participates_table.sql"
              relativeToChangelogFile="true"/>
+
+    <include file="scripts/006_ddl_create_car_engine_owner_tables.sql"
+             relativeToChangelogFile="true"/>
 </databaseChangeLog>

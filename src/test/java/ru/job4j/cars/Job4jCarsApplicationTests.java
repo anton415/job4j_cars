@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import ru.job4j.cars.model.Car;
+import ru.job4j.cars.model.Engine;
+import ru.job4j.cars.model.Owner;
 import ru.job4j.cars.model.Post;
 import ru.job4j.cars.model.PriceHistory;
 import ru.job4j.cars.model.User;
@@ -31,11 +34,21 @@ class Job4jCarsApplicationTests {
         Integer postsCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM auto_post", Integer.class);
         Integer priceHistoryCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM price_history", Integer.class);
         Integer participatesCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM participates", Integer.class);
+        Integer enginesCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM engine", Integer.class);
+        Integer carsCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM car", Integer.class);
+        Integer ownersCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM owners", Integer.class);
+        Integer historyOwnersCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM history_owners", Integer.class);
+        Integer historyCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM history", Integer.class);
 
         assertThat(usersCount).isEqualTo(3);
         assertThat(postsCount).isZero();
         assertThat(priceHistoryCount).isZero();
         assertThat(participatesCount).isZero();
+        assertThat(enginesCount).isZero();
+        assertThat(carsCount).isZero();
+        assertThat(ownersCount).isZero();
+        assertThat(historyOwnersCount).isZero();
+        assertThat(historyCount).isZero();
     }
 
     @Test
@@ -47,6 +60,7 @@ class Job4jCarsApplicationTests {
         var post = new Post();
         post.setDescription("Car sale post");
         post.setUser(user);
+        post.setCar(createCar());
         var priceHistory = new PriceHistory();
         priceHistory.setBefore(1_000_000L);
         priceHistory.setAfter(950_000L);
@@ -72,6 +86,7 @@ class Job4jCarsApplicationTests {
         var post = new Post();
         post.setDescription("Car sale post");
         post.setUser(users.get(0));
+        post.setCar(createCar());
         post.addParticipate(users.get(1));
 
         entityManager.persist(post);
@@ -83,5 +98,45 @@ class Job4jCarsApplicationTests {
         assertThat(savedPost.getParticipates())
                 .extracting(User::getId)
                 .containsExactly(users.get(1).getId());
+    }
+
+    @Test
+    @Transactional
+    void whenSaveCarThenSaveOwners() {
+        var user = entityManager.createQuery("FROM User u ORDER BY u.id", User.class)
+                .setMaxResults(1)
+                .getSingleResult();
+        var engine = new Engine();
+        engine.setName("V6");
+        entityManager.persist(engine);
+        var owner = new Owner();
+        owner.setName("Ivan Ivanov");
+        owner.setUser(user);
+        var car = new Car();
+        car.setName("Toyota Camry");
+        car.setEngine(engine);
+        car.addOwner(owner);
+
+        entityManager.persist(car);
+        entityManager.flush();
+        entityManager.clear();
+
+        var savedCar = entityManager.find(Car.class, car.getId());
+
+        assertThat(savedCar.getEngine().getName()).isEqualTo("V6");
+        assertThat(savedCar.getOwners())
+                .extracting(Owner::getName)
+                .containsExactly("Ivan Ivanov");
+    }
+
+    private Car createCar() {
+        var engine = new Engine();
+        engine.setName("engine-" + System.nanoTime());
+        entityManager.persist(engine);
+        var car = new Car();
+        car.setName("car-" + System.nanoTime());
+        car.setEngine(engine);
+        entityManager.persist(car);
+        return car;
     }
 }
