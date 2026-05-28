@@ -16,7 +16,7 @@
 
 ## Milestone 3 — User flows
 
-- [ ] Task 06: Implement registration, login, logout and session handling.
+- [x] Task 06: Implement registration, login, logout and session handling.
 
 ## Milestone 4 — Post flows
 
