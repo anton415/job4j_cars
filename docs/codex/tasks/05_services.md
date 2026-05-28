@@ -25,3 +25,16 @@ Create service layer that hides repository details and enforces business rules.
 ## Suggested Codex prompt
 
 Implement Task 05 from `docs/codex/tasks/05_services.md`. Add service layer for users, cars and posts. Enforce registration/login and author-only sold-status business rules. Do not use Spring Data. Keep changes focused.
+
+## Status
+
+Done on 2026-05-28.
+
+## Verification
+
+- `mvn test` passes: 13 tests, 0 failures, 0 errors.
+- `rg -n "spring-boot-starter-data-jpa|JpaRepository|CrudRepository|PagingAndSortingRepository|EnableJpaRepositories|org\\.springframework\\.data|@Repository" pom.xml src/main src/test -S` returns no matches.
+
+## Remaining risks
+
+- Controllers are not wired to services yet; registration/login pages, session handling, and HTTP status changes remain for later tasks.

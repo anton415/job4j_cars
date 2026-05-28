@@ -12,7 +12,7 @@
 
 ## Milestone 2 — Business layer
 
-- [ ] Task 05: Implement services and business rules.
+- [x] Task 05: Implement services and business rules.
 
 ## Milestone 3 — User flows
 
