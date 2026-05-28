@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Создать объявление</title>
+</head>
+<body>
+<nav>
+    <a th:href="@{/posts}">Объявления</a>
+    <span th:if="${currentUser == null}">
+        <a th:href="@{/users/login}">Войти</a>
+        <a th:href="@{/users/register}">Регистрация</a>
+    </span>
+    <span th:if="${currentUser != null}">
+        <span th:text="${currentUser.name}">Пользователь</span>
+        <a th:href="@{/users/logout}">Выйти</a>
+    </span>
+</nav>
+<main>
+    <p>
+        <a th:href="@{/posts}">К списку объявлений</a>
+    </p>
+    <h1>Создать объявление</h1>
+    <p th:if="${message != null}" th:text="${message}"></p>
+    <form th:action="@{/posts/create}" th:object="${post}" method="post">
+        <div>
+            <label for="title">Название</label>
+            <input type="text" id="title" th:field="*{title}" required>
+        </div>
+        <div>
+            <label for="description">Описание</label>
+            <textarea id="description" th:field="*{description}" rows="5"></textarea>
+        </div>
+        <div>
+            <label for="price">Цена</label>
+            <input type="number" id="price" th:field="*{price}" min="0.01" step="0.01" required>
+        </div>
+        <h2>Автомобиль</h2>
+        <div>
+            <label for="brand">Марка</label>
+            <input type="text" id="brand" th:field="*{car.brand}" required>
+        </div>
+        <div>
+            <label for="model">Модель</label>
+            <input type="text" id="model" th:field="*{car.model}" required>
+        </div>
+        <div>
+            <label for="year">Год выпуска</label>
+            <input type="number" id="year" th:field="*{car.year}" min="1" required>
+        </div>
+        <div>
+            <label for="bodyType">Кузов</label>
+            <input type="text" id="bodyType" th:field="*{car.bodyType}" required>
+        </div>
+        <div>
+            <label for="engineType">Двигатель</label>
+            <input type="text" id="engineType" th:field="*{car.engineType}" required>
+        </div>
+        <div>
+            <label for="transmission">Коробка передач</label>
+            <input type="text" id="transmission" th:field="*{car.transmission}" required>
+        </div>
+        <div>
+            <label for="mileage">Пробег</label>
+            <input type="number" id="mileage" th:field="*{car.mileage}" min="0" required>
+        </div>
+        <button type="submit">Создать</button>
+    </form>
+</main>
+</body>
+</html>
