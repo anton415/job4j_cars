@@ -2,7 +2,7 @@
 
 ## Milestone 0 — Audit and baseline
 
-- [ ] Task 01: Audit current repository and remove Spring Data risk.
+- [x] Task 01: Audit current repository and remove Spring Data risk.
 - [ ] Task 02: Align Maven, Hibernate configuration, Liquibase and `SessionFactory` bean.
 
 ## Milestone 1 — Domain and database

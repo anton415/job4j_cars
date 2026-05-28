@@ -8,45 +8,45 @@ import java.util.Map;
 import java.util.Optional;
 
 public class OwnerRepository {
-    private final CrudRepository crudRepository;
+    private final HibernateRepository hibernateRepository;
 
     public OwnerRepository(SessionFactory sf) {
-        this(new CrudRepository(sf));
+        this(new HibernateRepository(sf));
     }
 
-    public OwnerRepository(CrudRepository crudRepository) {
-        this.crudRepository = crudRepository;
+    public OwnerRepository(HibernateRepository hibernateRepository) {
+        this.hibernateRepository = hibernateRepository;
     }
 
     public Owner create(Owner owner) {
-        crudRepository.run(session -> session.persist(owner));
+        hibernateRepository.run(session -> session.persist(owner));
         return owner;
     }
 
     public void update(Owner owner) {
-        crudRepository.run(session -> session.merge(owner));
+        hibernateRepository.run(session -> session.merge(owner));
     }
 
     public void delete(Integer ownerId) {
-        crudRepository.run(
+        hibernateRepository.run(
                 "DELETE FROM Owner o WHERE o.id = :ownerId",
                 Map.of("ownerId", ownerId)
         );
     }
 
     public List<Owner> findAllOrderById() {
-        return crudRepository.query("FROM Owner o ORDER BY o.id", Owner.class);
+        return hibernateRepository.query("FROM Owner o ORDER BY o.id", Owner.class);
     }
 
     public Optional<Owner> findById(Integer ownerId) {
-        return crudRepository.optional(
+        return hibernateRepository.optional(
                 "FROM Owner o WHERE o.id = :ownerId", Owner.class,
                 Map.of("ownerId", ownerId)
         );
     }
 
     public List<Owner> findByLikeName(String key) {
-        return crudRepository.query(
+        return hibernateRepository.query(
                 "FROM Owner o WHERE o.name LIKE :key ORDER BY o.id", Owner.class,
                 Map.of("key", "%" + key + "%")
         );

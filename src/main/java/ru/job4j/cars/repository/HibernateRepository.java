@@ -10,10 +10,10 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class CrudRepository {
+public class HibernateRepository {
     private final SessionFactory sf;
 
-    public CrudRepository(SessionFactory sf) {
+    public HibernateRepository(SessionFactory sf) {
         this.sf = sf;
     }
 

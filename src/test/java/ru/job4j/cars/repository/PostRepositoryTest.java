@@ -1,13 +1,9 @@
 package ru.job4j.cars.repository;
 
-import jakarta.persistence.EntityManagerFactory;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import ru.job4j.cars.model.Car;
 import ru.job4j.cars.model.Engine;
 import ru.job4j.cars.model.Post;
@@ -22,14 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-class PostRepositoryTest {
-
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
-
-    private CrudRepository crudRepository;
-
+class PostRepositoryTest extends HibernateRepositoryTest {
     private PostRepository postRepository;
 
     private CarRepository carRepository;
@@ -48,12 +37,10 @@ class PostRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        var sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-        crudRepository = new CrudRepository(sessionFactory);
-        postRepository = new PostRepository(crudRepository);
-        carRepository = new CarRepository(crudRepository);
-        engineRepository = new EngineRepository(crudRepository);
-        userRepository = new UserRepository(crudRepository);
+        postRepository = new PostRepository(hibernateRepository);
+        carRepository = new CarRepository(hibernateRepository);
+        engineRepository = new EngineRepository(hibernateRepository);
+        userRepository = new UserRepository(hibernateRepository);
     }
 
     @AfterEach
@@ -120,7 +107,7 @@ class PostRepositoryTest {
 
     private Post createPost(String description, LocalDateTime created, Set<String> photos, String carName) {
         var postRef = new AtomicReference<Post>();
-        crudRepository.run(session -> {
+        hibernateRepository.run(session -> {
             var user = new User();
             user.setLogin(uniqueName("post_user"));
             user.setPassword("password");

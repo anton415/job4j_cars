@@ -1,17 +1,23 @@
 package ru.job4j.cars;
 
-import jakarta.persistence.EntityManager;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 import ru.job4j.cars.model.Car;
 import ru.job4j.cars.model.Engine;
 import ru.job4j.cars.model.Owner;
 import ru.job4j.cars.model.Post;
 import ru.job4j.cars.model.PriceHistory;
 import ru.job4j.cars.model.User;
+import ru.job4j.cars.repository.HibernateRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,8 +27,32 @@ class Job4jCarsApplicationTests {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private EntityManager entityManager;
+    private StandardServiceRegistry registry;
+
+    private SessionFactory sf;
+
+    private HibernateRepository hibernateRepository;
+
+    @BeforeEach
+    void initSessionFactory() {
+        registry = new StandardServiceRegistryBuilder()
+                .configure("hibernate-test.cfg.xml")
+                .build();
+        sf = new MetadataSources(registry)
+                .buildMetadata()
+                .buildSessionFactory();
+        hibernateRepository = new HibernateRepository(sf);
+    }
+
+    @AfterEach
+    void closeSessionFactory() {
+        if (sf != null) {
+            sf.close();
+        }
+        if (registry != null) {
+            StandardServiceRegistryBuilder.destroy(registry);
+        }
+    }
 
     @Test
     void contextLoads() {
@@ -54,91 +84,95 @@ class Job4jCarsApplicationTests {
     }
 
     @Test
-    @Transactional
     void whenSavePostThenSavePriceHistory() {
-        var user = entityManager.createQuery("FROM User u ORDER BY u.id", User.class)
-                .setMaxResults(1)
-                .getSingleResult();
-        var post = new Post();
-        post.setDescription("Car sale post");
-        post.setUser(user);
-        post.setCar(createCar());
-        var priceHistory = new PriceHistory();
-        priceHistory.setBefore(1_000_000L);
-        priceHistory.setAfter(950_000L);
-        post.addPriceHistory(priceHistory);
+        hibernateRepository.run(session -> {
+            var post = new Post();
+            post.setDescription("Car sale post");
+            post.setUser(createUser(session));
+            post.setCar(createCar(session));
+            var priceHistory = new PriceHistory();
+            priceHistory.setBefore(1_000_000L);
+            priceHistory.setAfter(950_000L);
+            post.addPriceHistory(priceHistory);
 
-        entityManager.persist(post);
-        entityManager.flush();
-        entityManager.clear();
+            session.persist(post);
+            session.flush();
+            session.clear();
 
-        var savedPost = entityManager.find(Post.class, post.getId());
+            var savedPost = session.find(Post.class, post.getId());
 
-        assertThat(savedPost.getPriceHistory())
-                .extracting(PriceHistory::getBefore)
-                .containsExactly(1_000_000L);
+            assertThat(savedPost.getPriceHistory())
+                    .extracting(PriceHistory::getBefore)
+                    .containsExactly(1_000_000L);
+        });
     }
 
     @Test
-    @Transactional
     void whenSavePostThenSaveParticipates() {
-        var users = entityManager.createQuery("FROM User u ORDER BY u.id", User.class)
-                .setMaxResults(2)
-                .getResultList();
-        var post = new Post();
-        post.setDescription("Car sale post");
-        post.setUser(users.get(0));
-        post.setCar(createCar());
-        post.addParticipate(users.get(1));
+        hibernateRepository.run(session -> {
+            var firstUser = createUser(session);
+            var secondUser = createUser(session);
+            var post = new Post();
+            post.setDescription("Car sale post");
+            post.setUser(firstUser);
+            post.setCar(createCar(session));
+            post.addParticipate(secondUser);
 
-        entityManager.persist(post);
-        entityManager.flush();
-        entityManager.clear();
+            session.persist(post);
+            session.flush();
+            session.clear();
 
-        var savedPost = entityManager.find(Post.class, post.getId());
+            var savedPost = session.find(Post.class, post.getId());
 
-        assertThat(savedPost.getParticipates())
-                .extracting(User::getId)
-                .containsExactly(users.get(1).getId());
+            assertThat(savedPost.getParticipates())
+                    .extracting(User::getId)
+                    .containsExactly(secondUser.getId());
+        });
     }
 
     @Test
-    @Transactional
     void whenSaveCarThenSaveOwners() {
-        var user = entityManager.createQuery("FROM User u ORDER BY u.id", User.class)
-                .setMaxResults(1)
-                .getSingleResult();
-        var engine = new Engine();
-        engine.setName("V6");
-        entityManager.persist(engine);
-        var owner = new Owner();
-        owner.setName("Ivan Ivanov");
-        owner.setUser(user);
-        var car = new Car();
-        car.setName("Toyota Camry");
-        car.setEngine(engine);
-        car.addOwner(owner);
+        hibernateRepository.run(session -> {
+            var engine = new Engine();
+            engine.setName("V6");
+            session.persist(engine);
+            var owner = new Owner();
+            owner.setName("Ivan Ivanov");
+            owner.setUser(createUser(session));
+            var car = new Car();
+            car.setName("Toyota Camry");
+            car.setEngine(engine);
+            car.addOwner(owner);
 
-        entityManager.persist(car);
-        entityManager.flush();
-        entityManager.clear();
+            session.persist(car);
+            session.flush();
+            session.clear();
 
-        var savedCar = entityManager.find(Car.class, car.getId());
+            var savedCar = session.find(Car.class, car.getId());
 
-        assertThat(savedCar.getEngine().getName()).isEqualTo("V6");
-        assertThat(savedCar.getOwners())
-                .extracting(Owner::getName)
-                .containsExactly("Ivan Ivanov");
+            assertThat(savedCar.getEngine().getName()).isEqualTo("V6");
+            assertThat(savedCar.getOwners())
+                    .extracting(Owner::getName)
+                    .containsExactly("Ivan Ivanov");
+        });
     }
 
-    private Car createCar() {
+    private User createUser(Session session) {
+        var user = new User();
+        user.setLogin("user-" + System.nanoTime());
+        user.setPassword("password");
+        session.persist(user);
+        return user;
+    }
+
+    private Car createCar(Session session) {
         var engine = new Engine();
         engine.setName("engine-" + System.nanoTime());
-        entityManager.persist(engine);
+        session.persist(engine);
         var car = new Car();
         car.setName("car-" + System.nanoTime());
         car.setEngine(engine);
-        entityManager.persist(car);
+        session.persist(car);
         return car;
     }
 }

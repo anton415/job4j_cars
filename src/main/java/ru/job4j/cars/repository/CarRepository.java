@@ -8,34 +8,34 @@ import java.util.Map;
 import java.util.Optional;
 
 public class CarRepository {
-    private final CrudRepository crudRepository;
+    private final HibernateRepository hibernateRepository;
 
     public CarRepository(SessionFactory sf) {
-        this(new CrudRepository(sf));
+        this(new HibernateRepository(sf));
     }
 
-    public CarRepository(CrudRepository crudRepository) {
-        this.crudRepository = crudRepository;
+    public CarRepository(HibernateRepository hibernateRepository) {
+        this.hibernateRepository = hibernateRepository;
     }
 
     public Car create(Car car) {
-        crudRepository.run(session -> session.persist(car));
+        hibernateRepository.run(session -> session.persist(car));
         return car;
     }
 
     public void update(Car car) {
-        crudRepository.run(session -> session.merge(car));
+        hibernateRepository.run(session -> session.merge(car));
     }
 
     public void delete(Integer carId) {
-        crudRepository.run(
+        hibernateRepository.run(
                 "DELETE FROM Car c WHERE c.id = :carId",
                 Map.of("carId", carId)
         );
     }
 
     public List<Car> findAllOrderById() {
-        return crudRepository.query(
+        return hibernateRepository.query(
                 "SELECT DISTINCT c FROM Car c "
                         + "JOIN FETCH c.engine "
                         + "LEFT JOIN FETCH c.owners "
@@ -45,7 +45,7 @@ public class CarRepository {
     }
 
     public Optional<Car> findById(Integer carId) {
-        return crudRepository.optional(
+        return hibernateRepository.optional(
                 "SELECT DISTINCT c FROM Car c "
                         + "JOIN FETCH c.engine "
                         + "LEFT JOIN FETCH c.owners "
@@ -56,7 +56,7 @@ public class CarRepository {
     }
 
     public List<Car> findByLikeName(String key) {
-        return crudRepository.query(
+        return hibernateRepository.query(
                 "SELECT DISTINCT c FROM Car c "
                         + "JOIN FETCH c.engine "
                         + "LEFT JOIN FETCH c.owners "

@@ -11,7 +11,7 @@ abstract class HibernateRepositoryTest {
     private StandardServiceRegistry registry;
     private SessionFactory sf;
 
-    protected CrudRepository crudRepository;
+    protected HibernateRepository hibernateRepository;
 
     @BeforeEach
     void initSessionFactory() {
@@ -21,7 +21,7 @@ abstract class HibernateRepositoryTest {
         sf = new MetadataSources(registry)
                 .buildMetadata()
                 .buildSessionFactory();
-        crudRepository = new CrudRepository(sf);
+        hibernateRepository = new HibernateRepository(sf);
     }
 
     @AfterEach

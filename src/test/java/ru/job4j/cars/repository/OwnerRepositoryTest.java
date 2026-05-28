@@ -14,8 +14,8 @@ class OwnerRepositoryTest extends HibernateRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new OwnerRepository(crudRepository);
-        userRepository = new UserRepository(crudRepository);
+        repository = new OwnerRepository(hibernateRepository);
+        userRepository = new UserRepository(hibernateRepository);
     }
 
     @Test

@@ -9,27 +9,27 @@ import java.util.Map;
 import java.util.Optional;
 
 public class PostRepository {
-    private final CrudRepository crudRepository;
+    private final HibernateRepository hibernateRepository;
 
     public PostRepository(SessionFactory sf) {
-        this(new CrudRepository(sf));
+        this(new HibernateRepository(sf));
     }
 
-    public PostRepository(CrudRepository crudRepository) {
-        this.crudRepository = crudRepository;
+    public PostRepository(HibernateRepository hibernateRepository) {
+        this.hibernateRepository = hibernateRepository;
     }
 
     public Post create(Post post) {
-        crudRepository.run(session -> session.persist(post));
+        hibernateRepository.run(session -> session.persist(post));
         return post;
     }
 
     public void update(Post post) {
-        crudRepository.run(session -> session.merge(post));
+        hibernateRepository.run(session -> session.merge(post));
     }
 
     public void delete(Integer postId) {
-        crudRepository.run(session -> {
+        hibernateRepository.run(session -> {
             var post = session.find(Post.class, postId);
             if (post != null) {
                 session.remove(post);
@@ -38,7 +38,7 @@ public class PostRepository {
     }
 
     public Optional<Post> findById(Integer postId) {
-        return crudRepository.optional(
+        return hibernateRepository.optional(
                 "SELECT DISTINCT p FROM Post p "
                         + "JOIN FETCH p.user "
                         + "JOIN FETCH p.car "
@@ -51,7 +51,7 @@ public class PostRepository {
 
     public List<Post> findAllLastDay() {
         var createdBefore = LocalDateTime.now();
-        return crudRepository.query(
+        return hibernateRepository.query(
                 "SELECT DISTINCT p FROM Post p "
                         + "JOIN FETCH p.user "
                         + "JOIN FETCH p.car "
@@ -67,7 +67,7 @@ public class PostRepository {
     }
 
     public List<Post> findAllWithPhoto() {
-        return crudRepository.query(
+        return hibernateRepository.query(
                 "SELECT DISTINCT p FROM Post p "
                         + "JOIN FETCH p.user "
                         + "JOIN FETCH p.car "
@@ -79,7 +79,7 @@ public class PostRepository {
     }
 
     public List<Post> findAllByBrand(String brand) {
-        return crudRepository.query(
+        return hibernateRepository.query(
                 "SELECT DISTINCT p FROM Post p "
                         + "JOIN FETCH p.user "
                         + "JOIN FETCH p.car c "

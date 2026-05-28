@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.Optional;
 
 public class UserRepository {
-    private final CrudRepository crudRepository;
+    private final HibernateRepository hibernateRepository;
 
     public UserRepository(SessionFactory sf) {
-        this(new CrudRepository(sf));
+        this(new HibernateRepository(sf));
     }
 
-    public UserRepository(CrudRepository crudRepository) {
-        this.crudRepository = crudRepository;
+    public UserRepository(HibernateRepository hibernateRepository) {
+        this.hibernateRepository = hibernateRepository;
     }
 
     /**
@@ -24,7 +24,7 @@ public class UserRepository {
      * @return пользователь.
      */
     public User create(User user) {
-        crudRepository.run(session -> session.persist(user));
+        hibernateRepository.run(session -> session.persist(user));
         return user;
     }
 
@@ -33,7 +33,7 @@ public class UserRepository {
      * @param user пользователь.
      */
     public void update(User user) {
-        crudRepository.run(session -> session.merge(user));
+        hibernateRepository.run(session -> session.merge(user));
     }
 
     /**
@@ -41,7 +41,7 @@ public class UserRepository {
      * @param userId ID
      */
     public void delete(Integer userId) {
-        crudRepository.run(
+        hibernateRepository.run(
                 "DELETE FROM User u WHERE u.id = :userId",
                 Map.of("userId", userId)
         );
@@ -52,7 +52,7 @@ public class UserRepository {
      * @return список пользователей.
      */
     public List<User> findAllOrderById() {
-        return crudRepository.query("FROM User u ORDER BY u.id", User.class);
+        return hibernateRepository.query("FROM User u ORDER BY u.id", User.class);
     }
 
     /**
@@ -60,7 +60,7 @@ public class UserRepository {
      * @return пользователь.
      */
     public Optional<User> findById(Integer userId) {
-        return crudRepository.optional(
+        return hibernateRepository.optional(
                 "FROM User u WHERE u.id = :userId", User.class,
                 Map.of("userId", userId)
         );
@@ -72,7 +72,7 @@ public class UserRepository {
      * @return список пользователей.
      */
     public List<User> findByLikeLogin(String key) {
-        return crudRepository.query(
+        return hibernateRepository.query(
                 "FROM User u WHERE u.login LIKE :key ORDER BY u.id", User.class,
                 Map.of("key", "%" + key + "%")
         );
@@ -84,7 +84,7 @@ public class UserRepository {
      * @return Optional or user.
      */
     public Optional<User> findByLogin(String login) {
-        return crudRepository.optional(
+        return hibernateRepository.optional(
                 "FROM User u WHERE u.login = :login", User.class,
                 Map.of("login", login)
         );

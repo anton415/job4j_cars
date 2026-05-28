@@ -14,8 +14,8 @@ class CarRepositoryTest extends HibernateRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        repository = new CarRepository(crudRepository);
-        engineRepository = new EngineRepository(crudRepository);
+        repository = new CarRepository(hibernateRepository);
+        engineRepository = new EngineRepository(hibernateRepository);
     }
 
     @Test

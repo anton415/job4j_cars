@@ -8,52 +8,52 @@ import java.util.Map;
 import java.util.Optional;
 
 public class EngineRepository {
-    private final CrudRepository crudRepository;
+    private final HibernateRepository hibernateRepository;
 
     public EngineRepository(SessionFactory sf) {
-        this(new CrudRepository(sf));
+        this(new HibernateRepository(sf));
     }
 
-    public EngineRepository(CrudRepository crudRepository) {
-        this.crudRepository = crudRepository;
+    public EngineRepository(HibernateRepository hibernateRepository) {
+        this.hibernateRepository = hibernateRepository;
     }
 
     public Engine create(Engine engine) {
-        crudRepository.run(session -> session.persist(engine));
+        hibernateRepository.run(session -> session.persist(engine));
         return engine;
     }
 
     public void update(Engine engine) {
-        crudRepository.run(session -> session.merge(engine));
+        hibernateRepository.run(session -> session.merge(engine));
     }
 
     public void delete(Integer engineId) {
-        crudRepository.run(
+        hibernateRepository.run(
                 "DELETE FROM Engine e WHERE e.id = :engineId",
                 Map.of("engineId", engineId)
         );
     }
 
     public List<Engine> findAllOrderById() {
-        return crudRepository.query("FROM Engine e ORDER BY e.id", Engine.class);
+        return hibernateRepository.query("FROM Engine e ORDER BY e.id", Engine.class);
     }
 
     public Optional<Engine> findById(Integer engineId) {
-        return crudRepository.optional(
+        return hibernateRepository.optional(
                 "FROM Engine e WHERE e.id = :engineId", Engine.class,
                 Map.of("engineId", engineId)
         );
     }
 
     public List<Engine> findByLikeName(String key) {
-        return crudRepository.query(
+        return hibernateRepository.query(
                 "FROM Engine e WHERE e.name LIKE :key ORDER BY e.id", Engine.class,
                 Map.of("key", "%" + key + "%")
         );
     }
 
     public Optional<Engine> findByName(String name) {
-        return crudRepository.optional(
+        return hibernateRepository.optional(
                 "FROM Engine e WHERE e.name = :name", Engine.class,
                 Map.of("name", name)
         );

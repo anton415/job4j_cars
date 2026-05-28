@@ -1,13 +1,9 @@
 package ru.job4j.cars.repository;
 
-import jakarta.persistence.EntityManagerFactory;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import ru.job4j.cars.model.User;
 
 import java.util.ArrayList;
@@ -15,19 +11,14 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-class UserRepositoryTest {
-
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
-
+class UserRepositoryTest extends HibernateRepositoryTest {
     private UserRepository repository;
 
     private final List<Integer> createdUserIds = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
-        repository = new UserRepository(entityManagerFactory.unwrap(SessionFactory.class));
+        repository = new UserRepository(hibernateRepository);
     }
 
     @AfterEach
