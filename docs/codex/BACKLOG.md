@@ -28,5 +28,5 @@
 ## Milestone 5 — Quality and delivery
 
 - [x] Task 11: Add tests for repositories/services/controllers where practical.
-- [ ] Task 12: Update README with description, launch instructions and screenshots.
+- [x] Task 12: Update README with description, launch instructions and screenshots.
 - [ ] Task 13: Final review against job4j Web requirements.

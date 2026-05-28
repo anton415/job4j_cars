@@ -27,4 +27,19 @@ Prepare README for mentor review according to job4j Web project expectations.
 
 ## Suggested Codex prompt
 
-Implement Task 12 from `docs/codex/tasks/12_readme.md`. Update README for job4j_cars with features, stack, architecture, launch instructions and screenshot section. Do not invent screenshots; use placeholders if image files are absent.
+Implement Task 12 from `docs/codex/tasks/12_readme.md`. Update README for job4j_cars with features, stack, architecture, launch instructions and screenshot section. Do not invent screenshots; use placeholders if image files are absent. After that mark task as done.
+
+## Status
+
+Done on 2026-05-28.
+
+## Verification
+
+- README updated with project description, feature list, stack, architecture, launch instructions, database migration instructions and screenshot section.
+- Real UI screenshots captured with local Playwright against `mvn spring-boot:test-run` on port `18085`.
+- Screenshot files added: `images/posts.png`, `images/create-post.png`, `images/detail.png`, `images/login.png`.
+- `mvn test` passes: 20 tests, 0 failures, 0 errors.
+
+## Remaining risks
+
+- No known remaining risks for this task.
