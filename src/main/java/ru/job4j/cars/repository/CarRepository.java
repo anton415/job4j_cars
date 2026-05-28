@@ -40,20 +40,14 @@ public class CarRepository {
 
     public List<Car> findAllOrderById() {
         return hibernateRepository.query(
-                "SELECT DISTINCT c FROM Car c "
-                        + "JOIN FETCH c.engine "
-                        + "LEFT JOIN FETCH c.owners "
-                        + "ORDER BY c.id",
+                "FROM Car c ORDER BY c.id",
                 Car.class
         );
     }
 
     public Optional<Car> findById(Integer carId) {
         return hibernateRepository.optional(
-                "SELECT DISTINCT c FROM Car c "
-                        + "JOIN FETCH c.engine "
-                        + "LEFT JOIN FETCH c.owners "
-                        + "WHERE c.id = :carId",
+                "FROM Car c WHERE c.id = :carId",
                 Car.class,
                 Map.of("carId", carId)
         );
@@ -61,10 +55,8 @@ public class CarRepository {
 
     public List<Car> findByLikeName(String key) {
         return hibernateRepository.query(
-                "SELECT DISTINCT c FROM Car c "
-                        + "JOIN FETCH c.engine "
-                        + "LEFT JOIN FETCH c.owners "
-                        + "WHERE c.name LIKE :key "
+                "FROM Car c "
+                        + "WHERE c.brand LIKE :key OR c.model LIKE :key "
                         + "ORDER BY c.id",
                 Car.class,
                 Map.of("key", "%" + key + "%")

@@ -7,7 +7,7 @@
 
 ## Milestone 1 — Domain and database
 
-- [ ] Task 03: Create database schema and Hibernate model mappings.
+- [x] Task 03: Create database schema and Hibernate model mappings.
 - [ ] Task 04: Implement repositories with manual Hibernate `SessionFactory`.
 
 ## Milestone 2 — Business layer

@@ -1,56 +1,39 @@
 package ru.job4j.cars.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @Entity
-@Table(name = "car")
+@Table(name = "cars")
 public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
-    private String name;
+    private String brand;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "engine_id", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Engine engine;
+    @Column(nullable = false)
+    private String model;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "history_owners",
-            joinColumns = @JoinColumn(name = "car_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "owner_id", nullable = false)
-    )
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Set<Owner> owners = new HashSet<>();
+    @Column(name = "production_year", nullable = false)
+    private int year;
 
-    public void addOwner(Owner owner) {
-        owners.add(owner);
-    }
+    @Column(name = "body_type", nullable = false)
+    private String bodyType;
 
-    public void removeOwner(Owner owner) {
-        owners.remove(owner);
-    }
+    @Column(name = "engine_type", nullable = false)
+    private String engineType;
+
+    @Column(nullable = false)
+    private String transmission;
+
+    @Column(nullable = false)
+    private int mileage;
 }

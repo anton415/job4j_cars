@@ -71,25 +71,25 @@ public class UserRepository {
     }
 
     /**
-     * Список пользователей по login LIKE %key%
+     * Список пользователей по имени LIKE %key%
      * @param key key
      * @return список пользователей.
      */
     public List<User> findByLikeLogin(String key) {
         return hibernateRepository.query(
-                "FROM User u WHERE u.login LIKE :key ORDER BY u.id", User.class,
+                "FROM User u WHERE u.name LIKE :key ORDER BY u.id", User.class,
                 Map.of("key", "%" + key + "%")
         );
     }
 
     /**
-     * Найти пользователя по login.
-     * @param login login.
+     * Найти пользователя по email.
+     * @param login email.
      * @return Optional or user.
      */
     public Optional<User> findByLogin(String login) {
         return hibernateRepository.optional(
-                "FROM User u WHERE u.login = :login", User.class,
+                "FROM User u WHERE u.email = :login", User.class,
                 Map.of("login", login)
         );
     }

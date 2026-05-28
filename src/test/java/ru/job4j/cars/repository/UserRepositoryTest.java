@@ -31,7 +31,7 @@ class UserRepositoryTest extends HibernateRepositoryTest {
     @Test
     @DisplayName("Create saves user with generated id")
     void whenCreateThenSavedUserHasId() {
-        var user = createUser(uniqueLogin(), "password");
+        var user = createUser(uniqueName(), uniqueEmail(), "password");
 
         assertThat(user.getId()).isNotNull();
     }
@@ -39,46 +39,46 @@ class UserRepositoryTest extends HibernateRepositoryTest {
     @Test
     @DisplayName("Find by id returns user")
     void whenFindByIdThenUserPresent() {
-        var user = createUser(uniqueLogin(), "password");
+        var user = createUser(uniqueName(), uniqueEmail(), "password");
 
         assertThat(repository.findById(user.getId())).isPresent();
     }
 
     @Test
-    @DisplayName("Find by id returns matching login")
-    void whenFindByIdThenLoginMatches() {
-        var login = uniqueLogin();
-        var user = createUser(login, "password");
+    @DisplayName("Find by id returns matching email")
+    void whenFindByIdThenEmailMatches() {
+        var email = uniqueEmail();
+        var user = createUser(uniqueName(), email, "password");
 
-        assertThat(repository.findById(user.getId()).orElseThrow().getLogin())
-                .isEqualTo(login);
+        assertThat(repository.findById(user.getId()).orElseThrow().getEmail())
+                .isEqualTo(email);
     }
 
     @Test
-    @DisplayName("Find by login returns user")
-    void whenFindByLoginThenUserPresent() {
-        var login = uniqueLogin();
-        createUser(login, "password");
+    @DisplayName("Find by email returns user")
+    void whenFindByEmailThenUserPresent() {
+        var email = uniqueEmail();
+        createUser(uniqueName(), email, "password");
 
-        assertThat(repository.findByLogin(login)).isPresent();
+        assertThat(repository.findByLogin(email)).isPresent();
     }
 
     @Test
-    @DisplayName("Find by login returns matching id")
-    void whenFindByLoginThenIdMatches() {
-        var login = uniqueLogin();
-        var user = createUser(login, "password");
+    @DisplayName("Find by email returns matching id")
+    void whenFindByEmailThenIdMatches() {
+        var email = uniqueEmail();
+        var user = createUser(uniqueName(), email, "password");
 
-        assertThat(repository.findByLogin(login).orElseThrow().getId())
+        assertThat(repository.findByLogin(email).orElseThrow().getId())
                 .isEqualTo(user.getId());
     }
 
     @Test
-    @DisplayName("Find by login fragment returns matching user")
-    void whenFindByLikeLoginThenContainsUser() {
-        var user = createUser(uniqueLogin(), "password");
+    @DisplayName("Find by name fragment returns matching user")
+    void whenFindByLikeNameThenContainsUser() {
+        var user = createUser("Repository User " + System.nanoTime(), uniqueEmail(), "password");
 
-        assertThat(repository.findByLikeLogin("repository_user_"))
+        assertThat(repository.findByLikeLogin("Repository User"))
                 .extracting(User::getId)
                 .contains(user.getId());
     }
@@ -86,7 +86,7 @@ class UserRepositoryTest extends HibernateRepositoryTest {
     @Test
     @DisplayName("Update changes password")
     void whenUpdateThenPasswordChanged() {
-        var user = createUser(uniqueLogin(), "password");
+        var user = createUser(uniqueName(), uniqueEmail(), "password");
         user.setPassword("newPassword");
 
         repository.update(user);
@@ -106,24 +106,29 @@ class UserRepositoryTest extends HibernateRepositoryTest {
     @Test
     @DisplayName("Delete removes user")
     void whenDeleteThenUserNotFound() {
-        var user = createUser(uniqueLogin(), "password");
+        var user = createUser(uniqueName(), uniqueEmail(), "password");
 
         repository.delete(user.getId());
 
         assertThat(repository.findById(user.getId())).isEmpty();
     }
 
-    private User createUser(String login, String password) {
+    private User createUser(String name, String email, String password) {
         var user = new User();
-        user.setLogin(login);
+        user.setName(name);
+        user.setEmail(email);
         user.setPassword(password);
         repository.create(user);
-        var createdUser = repository.findByLogin(login).orElseThrow();
+        var createdUser = repository.findByLogin(email).orElseThrow();
         createdUserIds.add(createdUser.getId());
         return createdUser;
     }
 
-    private String uniqueLogin() {
-        return "repository_user_" + System.nanoTime();
+    private String uniqueName() {
+        return "Repository User " + System.nanoTime();
+    }
+
+    private String uniqueEmail() {
+        return "repository_user_" + System.nanoTime() + "@example.com";
     }
 }

@@ -34,3 +34,16 @@ Create the core model classes and database migrations for users, cars and posts.
 ## Suggested Codex prompt
 
 Implement Task 03 from `docs/codex/tasks/03_domain_schema.md`. Add domain models and Liquibase migrations for `User`, `Car`, and `Post`. Use Hibernate annotations and manual SessionFactory-compatible mappings. Do not implement repositories yet except for compile fixes if necessary.
+
+## Status
+
+Done on 2026-05-28.
+
+## Verification
+
+- `mvn clean test` passes: 17 tests, 0 failures, 0 errors.
+- `rg -n "spring-boot-starter-data-jpa|JpaRepository|CrudRepository|PagingAndSortingRepository|EnableJpaRepositories|org\\.springframework\\.data" pom.xml src/main src/test -S` returns no matches.
+
+## Remaining risks
+
+- Existing `UserRepository`, `CarRepository`, and `PostRepository` were only adjusted enough to compile and run against the new mappings. Task 04 still needs to implement the required repository API from `SPEC.md`.

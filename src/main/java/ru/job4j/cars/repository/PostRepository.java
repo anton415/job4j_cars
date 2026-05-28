@@ -46,7 +46,6 @@ public class PostRepository {
                 "SELECT DISTINCT p FROM Post p "
                         + "JOIN FETCH p.user "
                         + "JOIN FETCH p.car "
-                        + "LEFT JOIN FETCH p.photos "
                         + "WHERE p.id = :postId",
                 Post.class,
                 Map.of("postId", postId)
@@ -59,7 +58,6 @@ public class PostRepository {
                 "SELECT DISTINCT p FROM Post p "
                         + "JOIN FETCH p.user "
                         + "JOIN FETCH p.car "
-                        + "LEFT JOIN FETCH p.photos "
                         + "WHERE p.created BETWEEN :createdAfter AND :createdBefore "
                         + "ORDER BY p.id",
                 Post.class,
@@ -75,8 +73,7 @@ public class PostRepository {
                 "SELECT DISTINCT p FROM Post p "
                         + "JOIN FETCH p.user "
                         + "JOIN FETCH p.car "
-                        + "JOIN FETCH p.photos photo "
-                        + "WHERE photo <> '' "
+                        + "WHERE p.photoPath IS NOT NULL AND p.photoPath <> '' "
                         + "ORDER BY p.id",
                 Post.class
         );
@@ -87,8 +84,7 @@ public class PostRepository {
                 "SELECT DISTINCT p FROM Post p "
                         + "JOIN FETCH p.user "
                         + "JOIN FETCH p.car c "
-                        + "LEFT JOIN FETCH p.photos "
-                        + "WHERE c.name = :brand "
+                        + "WHERE c.brand = :brand "
                         + "ORDER BY p.id",
                 Post.class,
                 Map.of("brand", brand)
