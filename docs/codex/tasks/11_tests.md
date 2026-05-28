@@ -23,4 +23,17 @@ Add practical tests without overengineering the training project.
 
 ## Suggested Codex prompt
 
-Implement Task 11 from `docs/codex/tasks/11_tests.md`. Add practical tests for repositories/services/controllers where the current project setup supports it. Prioritize service rules. Keep tests simple and make `mvn test` pass.
+Implement Task 11 from `docs/codex/tasks/11_tests.md`. Add practical tests for repositories/services/controllers where the current project setup supports it. Prioritize service rules. Keep tests simple and make `mvn test` pass. After that mark task as done.
+
+## Status
+
+Done on 2026-05-28.
+
+## Verification
+
+- `mvn test` passes: 20 tests, 0 failures, 0 errors.
+- `rg -n "spring-boot-starter-data-jpa|JpaRepository|CrudRepository|PagingAndSortingRepository|EnableJpaRepositories|org\\.springframework\\.data|@Repository" pom.xml src/main src/test -S` returns no matches.
+
+## Remaining risks
+
+- Controller smoke tests were not added because the project did not already have a Spring MVC test setup.
