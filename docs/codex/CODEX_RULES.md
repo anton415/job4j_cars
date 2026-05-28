@@ -6,6 +6,15 @@ Use this file as the system/context instruction when asking Codex to implement t
 
 Implement a job4j training web app for car sale posts with Spring Boot, Thymeleaf and Hibernate. Do not use Spring Data.
 
+## Minimal-code rule
+
+This is an educational project. For every task, write the minimum code needed to satisfy the current task and its acceptance criteria.
+
+- Prefer direct, readable course-style code over generic frameworks, reusable abstractions and future-proofing.
+- Do not add unused classes, methods, templates, configuration, DTOs, interfaces, mappers, validators, utilities or tests "just in case".
+- Treat optional items as "do not implement yet" unless the current task explicitly needs them.
+- If a simple implementation leaves a known gap outside the current task, document it as a remaining risk instead of solving a later task early.
+
 ## Forbidden
 
 - No `spring-boot-starter-data-jpa` if it introduces Spring Data repositories.
@@ -123,7 +132,8 @@ For each task:
 1. Read `docs/codex/SPEC.md`.
 2. Read `docs/codex/CODEX_RULES.md`.
 3. Read the current repository code before editing.
-4. Implement only the current task.
+4. Implement only the current task and only the code required by its acceptance criteria.
 5. Do not do unrelated refactoring.
-6. Run or at least preserve `mvn test` compatibility.
-7. Summarize changed files and any risks.
+6. Do not add optional or future-task functionality.
+7. Run or at least preserve `mvn test` compatibility.
+8. Summarize changed files and any risks.
