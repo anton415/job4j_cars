@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${post.title}">Объявление</title>
+</head>
+<body>
+<nav>
+    <a th:href="@{/posts}">Объявления</a>
+    <span th:if="${currentUser == null}">
+        <a th:href="@{/users/login}">Войти</a>
+        <a th:href="@{/users/register}">Регистрация</a>
+    </span>
+    <span th:if="${currentUser != null}">
+        <span th:text="${currentUser.name}">Пользователь</span>
+        <a th:href="@{/users/logout}">Выйти</a>
+    </span>
+</nav>
+<main>
+    <p>
+        <a th:href="@{/posts}">К списку объявлений</a>
+    </p>
+    <h1 th:text="${post.title}">Toyota Camry</h1>
+    <p>
+        <span th:text="${post.sold ? 'Продан' : 'В продаже'}">В продаже</span>
+        <button th:if="${currentUser != null and currentUser.id == post.user.id}"
+                type="button"
+                disabled
+                th:text="${post.sold ? 'Вернуть в продажу' : 'Отметить проданным'}">
+            Изменить статус
+        </button>
+    </p>
+    <p>
+        <a th:if="${currentUser != null}" th:href="@{/posts/create}">Создать объявление</a>
+        <a th:if="${currentUser == null}" th:href="@{/users/login}">Войти, чтобы создать объявление</a>
+    </p>
+    <div th:if="${post.photoPath != null}">
+        <img th:src="${post.photoPath}" alt="Фото автомобиля" width="320">
+    </div>
+    <h2>Описание</h2>
+    <p th:text="${post.description}">Описание автомобиля</p>
+    <h2>Автомобиль</h2>
+    <table border="1">
+        <tbody>
+        <tr>
+            <th>ID объявления</th>
+            <td th:text="${post.id}">1</td>
+        </tr>
+        <tr>
+            <th>Марка</th>
+            <td th:text="${post.car.brand}">Toyota</td>
+        </tr>
+        <tr>
+            <th>Модель</th>
+            <td th:text="${post.car.model}">Camry</td>
+        </tr>
+        <tr>
+            <th>Год выпуска</th>
+            <td th:text="${post.car.year}">2020</td>
+        </tr>
+        <tr>
+            <th>Кузов</th>
+            <td th:text="${post.car.bodyType}">sedan</td>
+        </tr>
+        <tr>
+            <th>Двигатель</th>
+            <td th:text="${post.car.engineType}">petrol</td>
+        </tr>
+        <tr>
+            <th>Коробка передач</th>
+            <td th:text="${post.car.transmission}">automatic</td>
+        </tr>
+        <tr>
+            <th>Пробег</th>
+            <td th:text="${post.car.mileage}">50000</td>
+        </tr>
+        <tr>
+            <th>Цена</th>
+            <td th:text="${post.price}">1000000.00</td>
+        </tr>
+        <tr>
+            <th>Автор</th>
+            <td th:text="${post.user.name}">Автор</td>
+        </tr>
+        <tr>
+            <th>Дата создания</th>
+            <td th:text="${post.created}">2026-05-28T12:00</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

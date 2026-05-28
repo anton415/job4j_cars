@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Объявления</title>
+</head>
+<body>
+<nav>
+    <a th:href="@{/posts}">Объявления</a>
+    <span th:if="${currentUser == null}">
+        <a th:href="@{/users/login}">Войти</a>
+        <a th:href="@{/users/register}">Регистрация</a>
+    </span>
+    <span th:if="${currentUser != null}">
+        <span th:text="${currentUser.name}">Пользователь</span>
+        <a th:href="@{/users/logout}">Выйти</a>
+    </span>
+</nav>
+<main>
+    <h1>Объявления о продаже автомобилей</h1>
+    <p>
+        <a th:if="${currentUser != null}" th:href="@{/posts/create}">Создать объявление</a>
+        <a th:if="${currentUser == null}" th:href="@{/users/login}">Войти, чтобы создать объявление</a>
+    </p>
+    <p th:if="${posts.isEmpty()}">Объявлений пока нет.</p>
+    <table th:if="${!posts.isEmpty()}" border="1">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Фото</th>
+            <th>Название</th>
+            <th>Марка</th>
+            <th>Модель</th>
+            <th>Год</th>
+            <th>Кузов</th>
+            <th>Цена</th>
+            <th>Статус</th>
+            <th>Автор</th>
+            <th>Создано</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="post : ${posts}">
+            <td th:text="${post.id}">1</td>
+            <td>
+                <img th:if="${post.photoPath != null}" th:src="${post.photoPath}" alt="Фото автомобиля" width="120">
+            </td>
+            <td>
+                <a th:href="@{/posts/{postId}(postId=${post.id})}" th:text="${post.title}">Toyota Camry</a>
+            </td>
+            <td th:text="${post.car.brand}">Toyota</td>
+            <td th:text="${post.car.model}">Camry</td>
+            <td th:text="${post.car.year}">2020</td>
+            <td th:text="${post.car.bodyType}">sedan</td>
+            <td th:text="${post.price}">1000000.00</td>
+            <td th:text="${post.sold ? 'Продан' : 'В продаже'}">В продаже</td>
+            <td th:text="${post.user.name}">Автор</td>
+            <td th:text="${post.created}">2026-05-28T12:00</td>
+            <td>
+                <a th:href="@{/posts/{postId}(postId=${post.id})}">Открыть</a>
+                <button th:if="${currentUser != null and currentUser.id == post.user.id}"
+                        type="button"
+                        disabled
+                        th:text="${post.sold ? 'Вернуть в продажу' : 'Отметить проданным'}">
+                    Изменить статус
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

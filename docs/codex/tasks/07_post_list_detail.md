@@ -29,3 +29,20 @@ Create the main user-facing pages for viewing car sale posts.
 ## Suggested Codex prompt
 
 Implement Task 07 from `docs/codex/tasks/07_post_list_detail.md`. Add post list and detail pages using Thymeleaf. Make sure repositories/services load `User` and `Car` data before rendering. Keep create/status actions minimal if later tasks are not complete yet.
+
+## Status
+
+- [x] Done
+
+## Verification
+
+- `mvn test` — passed, 13 tests.
+- Runtime check with H2-backed app on port 8081:
+  - `GET /` returns redirect to `/posts`;
+  - `GET /posts` renders the post list page for an anonymous user.
+
+## Remaining risks
+
+- `/posts/create` is only linked for authenticated users; the create form is still Task 08.
+- Author-only status buttons are visible but disabled; the status-changing action is still Task 10.
+- Photo paths are rendered as image sources when present; upload/static serving is still Task 09.

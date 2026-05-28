@@ -20,7 +20,7 @@
 
 ## Milestone 4 — Post flows
 
-- [ ] Task 07: Implement post list and detail pages.
+- [x] Task 07: Implement post list and detail pages.
 - [ ] Task 08: Implement create post flow with car fields.
 - [ ] Task 09: Implement photo upload and image display.
 - [ ] Task 10: Implement sold/not sold status change with author-only rule.
