@@ -2,6 +2,7 @@ package ru.job4j.cars;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -14,9 +15,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.job4j.cars.model.Car;
 import ru.job4j.cars.model.Post;
 import ru.job4j.cars.model.User;
-import ru.job4j.cars.repository.HibernateRepository;
 
 import java.math.BigDecimal;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,8 +31,6 @@ class Job4jCarsApplicationTests {
 
     private SessionFactory sf;
 
-    private HibernateRepository hibernateRepository;
-
     @BeforeEach
     void initSessionFactory() {
         registry = new StandardServiceRegistryBuilder()
@@ -40,7 +39,6 @@ class Job4jCarsApplicationTests {
         sf = new MetadataSources(registry)
                 .buildMetadata()
                 .buildSessionFactory();
-        hibernateRepository = new HibernateRepository(sf);
     }
 
     @AfterEach
@@ -70,7 +68,7 @@ class Job4jCarsApplicationTests {
 
     @Test
     void whenSavePostThenSaveUserCarAndPhotoPath() {
-        hibernateRepository.run(session -> {
+        run(session -> {
             var post = new Post();
             post.setTitle("Toyota Camry sale");
             post.setDescription("Car sale post");
@@ -91,6 +89,19 @@ class Job4jCarsApplicationTests {
             assertThat(savedPost.getUser().getEmail()).contains("@example.com");
             assertThat(savedPost.getCar().getBrand()).isEqualTo("Toyota");
         });
+    }
+
+    private void run(Consumer<Session> command) {
+        try (Session session = sf.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                command.accept(session);
+                tx.commit();
+            } catch (Exception e) {
+                tx.rollback();
+                throw e;
+            }
+        }
     }
 
     private User createUser(Session session) {

@@ -6,12 +6,12 @@ import ru.job4j.cars.model.Car;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CarRepositoryTest extends HibernateRepositoryTest {
+class CarRepositoryTest extends RepositoryTestSupport {
     private CarRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new CarRepository(hibernateRepository);
+        repository = new CarRepository(sf);
     }
 
     @Test
@@ -21,13 +21,6 @@ class CarRepositoryTest extends HibernateRepositoryTest {
         repository.create(car);
 
         assertThat(repository.findById(car.getId()).orElseThrow().getBrand()).isEqualTo("Toyota");
-    }
-
-    @Test
-    void whenFindByLikeNameThenReturnsMatch() {
-        var car = repository.create(car("Honda", "Accord"));
-
-        assertThat(repository.findByLikeName("ond")).contains(car);
     }
 
     private Car car(String brand, String model) {

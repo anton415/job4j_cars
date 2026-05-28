@@ -31,3 +31,16 @@ See `SPEC.md`, section 7.
 ## Suggested Codex prompt
 
 Implement Task 04 from `docs/codex/tasks/04_repositories.md`. Create manual Hibernate repositories for users, cars and posts. Use injected `SessionFactory`, explicit transactions and `join fetch` for post views. Do not add service/controller logic except wiring fixes.
+
+## Status
+
+Done on 2026-05-28.
+
+## Verification
+
+- `mvn test` passes: 13 tests, 0 failures, 0 errors.
+- `rg -n "spring-boot-starter-data-jpa|JpaRepository|CrudRepository|PagingAndSortingRepository|EnableJpaRepositories|org\\.springframework\\.data|@Repository" pom.xml src/main src/test -S` returns no matches.
+
+## Remaining risks
+
+- Service and controller wiring is still intentionally left for later tasks.

@@ -1,31 +1,18 @@
 package ru.job4j.cars.repository;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.job4j.cars.model.User;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UserRepositoryTest extends HibernateRepositoryTest {
+class UserRepositoryTest extends RepositoryTestSupport {
     private UserRepository repository;
-
-    private final List<Integer> createdUserIds = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
-        repository = new UserRepository(hibernateRepository);
-    }
-
-    @AfterEach
-    void tearDown() {
-        createdUserIds.stream()
-                .filter(userId -> userId != null)
-                .forEach(repository::delete);
+        repository = new UserRepository(sf);
     }
 
     @Test
@@ -60,7 +47,7 @@ class UserRepositoryTest extends HibernateRepositoryTest {
         var email = uniqueEmail();
         createUser(uniqueName(), email, "password");
 
-        assertThat(repository.findByLogin(email)).isPresent();
+        assertThat(repository.findByEmail(email)).isPresent();
     }
 
     @Test
@@ -69,48 +56,19 @@ class UserRepositoryTest extends HibernateRepositoryTest {
         var email = uniqueEmail();
         var user = createUser(uniqueName(), email, "password");
 
-        assertThat(repository.findByLogin(email).orElseThrow().getId())
+        assertThat(repository.findByEmail(email).orElseThrow().getId())
                 .isEqualTo(user.getId());
     }
 
     @Test
-    @DisplayName("Find by name fragment returns matching user")
-    void whenFindByLikeNameThenContainsUser() {
-        var user = createUser("Repository User " + System.nanoTime(), uniqueEmail(), "password");
+    @DisplayName("Find by email and password returns matching user")
+    void whenFindByEmailAndPasswordThenUserPresent() {
+        var email = uniqueEmail();
+        var user = createUser(uniqueName(), email, "password");
 
-        assertThat(repository.findByLikeLogin("Repository User"))
-                .extracting(User::getId)
-                .contains(user.getId());
-    }
-
-    @Test
-    @DisplayName("Update changes password")
-    void whenUpdateThenPasswordChanged() {
-        var user = createUser(uniqueName(), uniqueEmail(), "password");
-        user.setPassword("newPassword");
-
-        repository.update(user);
-
-        assertThat(repository.findById(user.getId()).orElseThrow().getPassword())
-                .isEqualTo("newPassword");
-    }
-
-    @Test
-    @DisplayName("Find all returns users sorted by id")
-    void whenFindAllOrderByIdThenResultSorted() {
-        assertThat(repository.findAllOrderById())
-                .extracting(User::getId)
-                .isSorted();
-    }
-
-    @Test
-    @DisplayName("Delete removes user")
-    void whenDeleteThenUserNotFound() {
-        var user = createUser(uniqueName(), uniqueEmail(), "password");
-
-        repository.delete(user.getId());
-
-        assertThat(repository.findById(user.getId())).isEmpty();
+        assertThat(repository.findByEmailAndPassword(email, "password").orElseThrow().getId())
+                .isEqualTo(user.getId());
+        assertThat(repository.findByEmailAndPassword(email, "wrong")).isEmpty();
     }
 
     private User createUser(String name, String email, String password) {
@@ -119,9 +77,7 @@ class UserRepositoryTest extends HibernateRepositoryTest {
         user.setEmail(email);
         user.setPassword(password);
         repository.create(user);
-        var createdUser = repository.findByLogin(email).orElseThrow();
-        createdUserIds.add(createdUser.getId());
-        return createdUser;
+        return repository.findByEmail(email).orElseThrow();
     }
 
     private String uniqueName() {

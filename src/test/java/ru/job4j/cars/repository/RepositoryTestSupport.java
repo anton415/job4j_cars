@@ -7,11 +7,10 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-abstract class HibernateRepositoryTest {
+abstract class RepositoryTestSupport {
     private StandardServiceRegistry registry;
-    private SessionFactory sf;
 
-    protected HibernateRepository hibernateRepository;
+    protected SessionFactory sf;
 
     @BeforeEach
     void initSessionFactory() {
@@ -21,7 +20,6 @@ abstract class HibernateRepositoryTest {
         sf = new MetadataSources(registry)
                 .buildMetadata()
                 .buildSessionFactory();
-        hibernateRepository = new HibernateRepository(sf);
     }
 
     @AfterEach

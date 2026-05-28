@@ -1,96 +1,63 @@
 package ru.job4j.cars.repository;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.Transaction;
 import org.springframework.stereotype.Component;
 import ru.job4j.cars.model.User;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Component
 public class UserRepository {
-    private final HibernateRepository hibernateRepository;
+    private final SessionFactory sf;
 
-    @Autowired
     public UserRepository(SessionFactory sf) {
-        this(new HibernateRepository(sf));
+        this.sf = sf;
     }
 
-    public UserRepository(HibernateRepository hibernateRepository) {
-        this.hibernateRepository = hibernateRepository;
-    }
-
-    /**
-     * Сохранить в базе.
-     * @param user пользователь.
-     * @return пользователь.
-     */
     public User create(User user) {
-        hibernateRepository.run(session -> session.persist(user));
-        return user;
+        return tx(session -> {
+            session.persist(user);
+            return user;
+        });
     }
 
-    /**
-     * Обновить в базе пользователя.
-     * @param user пользователь.
-     */
-    public void update(User user) {
-        hibernateRepository.run(session -> session.merge(user));
+    public Optional<User> findById(int userId) {
+        return tx(session -> Optional.ofNullable(session.find(User.class, userId)));
     }
 
-    /**
-     * Удалить пользователя по id.
-     * @param userId ID
-     */
-    public void delete(Integer userId) {
-        hibernateRepository.run(
-                "DELETE FROM User u WHERE u.id = :userId",
-                Map.of("userId", userId)
-        );
+    public Optional<User> findByEmailAndPassword(String email, String password) {
+        return tx(session -> session.createQuery(
+                        "FROM User u WHERE u.email = :email AND u.password = :password",
+                        User.class
+                )
+                .setParameter("email", email)
+                .setParameter("password", password)
+                .uniqueResultOptional());
     }
 
-    /**
-     * Список пользователь отсортированных по id.
-     * @return список пользователей.
-     */
-    public List<User> findAllOrderById() {
-        return hibernateRepository.query("FROM User u ORDER BY u.id", User.class);
+    public Optional<User> findByEmail(String email) {
+        return tx(session -> session.createQuery(
+                        "FROM User u WHERE u.email = :email",
+                        User.class
+                )
+                .setParameter("email", email)
+                .uniqueResultOptional());
     }
 
-    /**
-     * Найти пользователя по ID
-     * @return пользователь.
-     */
-    public Optional<User> findById(Integer userId) {
-        return hibernateRepository.optional(
-                "FROM User u WHERE u.id = :userId", User.class,
-                Map.of("userId", userId)
-        );
-    }
-
-    /**
-     * Список пользователей по имени LIKE %key%
-     * @param key key
-     * @return список пользователей.
-     */
-    public List<User> findByLikeLogin(String key) {
-        return hibernateRepository.query(
-                "FROM User u WHERE u.name LIKE :key ORDER BY u.id", User.class,
-                Map.of("key", "%" + key + "%")
-        );
-    }
-
-    /**
-     * Найти пользователя по email.
-     * @param login email.
-     * @return Optional or user.
-     */
-    public Optional<User> findByLogin(String login) {
-        return hibernateRepository.optional(
-                "FROM User u WHERE u.email = :login", User.class,
-                Map.of("login", login)
-        );
+    private <T> T tx(Function<Session, T> command) {
+        try (Session session = sf.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                T result = command.apply(session);
+                tx.commit();
+                return result;
+            } catch (Exception e) {
+                tx.rollback();
+                throw e;
+            }
+        }
     }
 }

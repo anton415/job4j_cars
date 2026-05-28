@@ -1,65 +1,44 @@
 package ru.job4j.cars.repository;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.Transaction;
 import org.springframework.stereotype.Component;
 import ru.job4j.cars.model.Car;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Component
 public class CarRepository {
-    private final HibernateRepository hibernateRepository;
+    private final SessionFactory sf;
 
-    @Autowired
     public CarRepository(SessionFactory sf) {
-        this(new HibernateRepository(sf));
-    }
-
-    public CarRepository(HibernateRepository hibernateRepository) {
-        this.hibernateRepository = hibernateRepository;
+        this.sf = sf;
     }
 
     public Car create(Car car) {
-        hibernateRepository.run(session -> session.persist(car));
-        return car;
+        return tx(session -> {
+            session.persist(car);
+            return car;
+        });
     }
 
-    public void update(Car car) {
-        hibernateRepository.run(session -> session.merge(car));
+    public Optional<Car> findById(int carId) {
+        return tx(session -> Optional.ofNullable(session.find(Car.class, carId)));
     }
 
-    public void delete(Integer carId) {
-        hibernateRepository.run(
-                "DELETE FROM Car c WHERE c.id = :carId",
-                Map.of("carId", carId)
-        );
-    }
-
-    public List<Car> findAllOrderById() {
-        return hibernateRepository.query(
-                "FROM Car c ORDER BY c.id",
-                Car.class
-        );
-    }
-
-    public Optional<Car> findById(Integer carId) {
-        return hibernateRepository.optional(
-                "FROM Car c WHERE c.id = :carId",
-                Car.class,
-                Map.of("carId", carId)
-        );
-    }
-
-    public List<Car> findByLikeName(String key) {
-        return hibernateRepository.query(
-                "FROM Car c "
-                        + "WHERE c.brand LIKE :key OR c.model LIKE :key "
-                        + "ORDER BY c.id",
-                Car.class,
-                Map.of("key", "%" + key + "%")
-        );
+    private <T> T tx(Function<Session, T> command) {
+        try (Session session = sf.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                T result = command.apply(session);
+                tx.commit();
+                return result;
+            } catch (Exception e) {
+                tx.rollback();
+                throw e;
+            }
+        }
     }
 }

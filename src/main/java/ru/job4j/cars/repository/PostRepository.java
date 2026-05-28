@@ -1,93 +1,73 @@
 package ru.job4j.cars.repository;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.Transaction;
 import org.springframework.stereotype.Component;
 import ru.job4j.cars.model.Post;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Component
 public class PostRepository {
-    private final HibernateRepository hibernateRepository;
+    private final SessionFactory sf;
 
-    @Autowired
     public PostRepository(SessionFactory sf) {
-        this(new HibernateRepository(sf));
-    }
-
-    public PostRepository(HibernateRepository hibernateRepository) {
-        this.hibernateRepository = hibernateRepository;
+        this.sf = sf;
     }
 
     public Post create(Post post) {
-        hibernateRepository.run(session -> session.persist(post));
-        return post;
-    }
-
-    public void update(Post post) {
-        hibernateRepository.run(session -> session.merge(post));
-    }
-
-    public void delete(Integer postId) {
-        hibernateRepository.run(session -> {
-            var post = session.find(Post.class, postId);
-            if (post != null) {
-                session.remove(post);
-            }
+        return tx(session -> {
+            session.persist(post);
+            return post;
         });
     }
 
-    public Optional<Post> findById(Integer postId) {
-        return hibernateRepository.optional(
-                "SELECT DISTINCT p FROM Post p "
-                        + "JOIN FETCH p.user "
-                        + "JOIN FETCH p.car "
-                        + "WHERE p.id = :postId",
-                Post.class,
-                Map.of("postId", postId)
-        );
-    }
-
-    public List<Post> findAllLastDay() {
-        var createdBefore = LocalDateTime.now();
-        return hibernateRepository.query(
-                "SELECT DISTINCT p FROM Post p "
-                        + "JOIN FETCH p.user "
-                        + "JOIN FETCH p.car "
-                        + "WHERE p.created BETWEEN :createdAfter AND :createdBefore "
-                        + "ORDER BY p.id",
-                Post.class,
-                Map.of(
-                        "createdAfter", createdBefore.minusDays(1),
-                        "createdBefore", createdBefore
+    public List<Post> findAll() {
+        return tx(session -> session.createQuery(
+                        "SELECT DISTINCT p FROM Post p "
+                                + "JOIN FETCH p.user "
+                                + "JOIN FETCH p.car "
+                                + "ORDER BY p.created DESC, p.id DESC",
+                        Post.class
                 )
-        );
+                .list());
     }
 
-    public List<Post> findAllWithPhoto() {
-        return hibernateRepository.query(
-                "SELECT DISTINCT p FROM Post p "
-                        + "JOIN FETCH p.user "
-                        + "JOIN FETCH p.car "
-                        + "WHERE p.photoPath IS NOT NULL AND p.photoPath <> '' "
-                        + "ORDER BY p.id",
-                Post.class
-        );
+    public Optional<Post> findById(int postId) {
+        return tx(session -> session.createQuery(
+                        "SELECT DISTINCT p FROM Post p "
+                                + "JOIN FETCH p.user "
+                                + "JOIN FETCH p.car "
+                                + "WHERE p.id = :postId",
+                        Post.class
+                )
+                .setParameter("postId", postId)
+                .uniqueResultOptional());
     }
 
-    public List<Post> findAllByBrand(String brand) {
-        return hibernateRepository.query(
-                "SELECT DISTINCT p FROM Post p "
-                        + "JOIN FETCH p.user "
-                        + "JOIN FETCH p.car c "
-                        + "WHERE c.brand = :brand "
-                        + "ORDER BY p.id",
-                Post.class,
-                Map.of("brand", brand)
-        );
+    public boolean updateSoldStatus(int postId, boolean sold) {
+        return tx(session -> session.createMutationQuery(
+                        "UPDATE Post p SET p.sold = :sold WHERE p.id = :postId"
+                )
+                .setParameter("sold", sold)
+                .setParameter("postId", postId)
+                .executeUpdate() > 0);
+    }
+
+    private <T> T tx(Function<Session, T> command) {
+        try (Session session = sf.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                T result = command.apply(session);
+                tx.commit();
+                return result;
+            } catch (Exception e) {
+                tx.rollback();
+                throw e;
+            }
+        }
     }
 }
