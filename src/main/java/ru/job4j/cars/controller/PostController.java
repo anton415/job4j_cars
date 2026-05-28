@@ -8,14 +8,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import ru.job4j.cars.model.Car;
 import ru.job4j.cars.model.Post;
 import ru.job4j.cars.model.User;
 import ru.job4j.cars.service.CarService;
 import ru.job4j.cars.service.PostService;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+
 @Controller
 public class PostController {
+    private static final String UPLOAD_DIR = "uploads";
+
     private final PostService postService;
 
     private final CarService carService;
@@ -58,6 +68,7 @@ public class PostController {
     @PostMapping("/posts/create")
     public String create(@ModelAttribute("post") Post post,
                          BindingResult bindingResult,
+                         @RequestParam(name = "photo", required = false) MultipartFile photo,
                          Model model,
                          HttpSession session) {
         User user = currentUser(session);
@@ -69,6 +80,13 @@ public class PostController {
         if (error != null) {
             addPostForm(model, post);
             model.addAttribute("message", error);
+            return "posts/create";
+        }
+        try {
+            post.setPhotoPath(savePhoto(photo));
+        } catch (IOException e) {
+            addPostForm(model, post);
+            model.addAttribute("message", "Не удалось сохранить фото");
             return "posts/create";
         }
         Car car = carService.create(post.getCar());
@@ -89,6 +107,7 @@ public class PostController {
         post.setSold(false);
         post.setTitle(trim(post.getTitle()));
         post.setDescription(trim(post.getDescription()));
+        post.setPhotoPath(null);
         Car car = post.getCar();
         car.setBrand(trim(car.getBrand()));
         car.setModel(trim(car.getModel()));
@@ -146,5 +165,26 @@ public class PostController {
 
     private String trim(String value) {
         return value == null ? null : value.trim();
+    }
+
+    private String savePhoto(MultipartFile photo) throws IOException {
+        if (photo == null || photo.isEmpty()) {
+            return null;
+        }
+        Path uploadPath = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
+        Files.createDirectories(uploadPath);
+        String fileName = UUID.randomUUID() + extension(photo.getOriginalFilename());
+        photo.transferTo(uploadPath.resolve(fileName));
+        return "/" + UPLOAD_DIR + "/" + fileName;
+    }
+
+    private String extension(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            return "";
+        }
+        String normalizedName = fileName.replace('\\', '/');
+        String cleanName = normalizedName.substring(normalizedName.lastIndexOf('/') + 1);
+        int index = cleanName.lastIndexOf('.');
+        return index == -1 ? "" : cleanName.substring(index);
     }
 }

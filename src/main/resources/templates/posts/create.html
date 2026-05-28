@@ -23,7 +23,7 @@
     </p>
     <h1>Создать объявление</h1>
     <p th:if="${message != null}" th:text="${message}"></p>
-    <form th:action="@{/posts/create}" th:object="${post}" method="post">
+    <form th:action="@{/posts/create}" th:object="${post}" method="post" enctype="multipart/form-data">
         <div>
             <label for="title">Название</label>
             <input type="text" id="title" th:field="*{title}" required>
@@ -64,6 +64,10 @@
         <div>
             <label for="mileage">Пробег</label>
             <input type="number" id="mileage" th:field="*{car.mileage}" min="0" required>
+        </div>
+        <div>
+            <label for="photo">Фото</label>
+            <input type="file" id="photo" name="photo" accept="image/*">
         </div>
         <button type="submit">Создать</button>
     </form>

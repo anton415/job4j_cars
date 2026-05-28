@@ -45,7 +45,7 @@
         <tr th:each="post : ${posts}">
             <td th:text="${post.id}">1</td>
             <td>
-                <img th:if="${post.photoPath != null}" th:src="${post.photoPath}" alt="Фото автомобиля" width="120">
+                <img th:if="${!#strings.isEmpty(post.photoPath)}" th:src="@{${post.photoPath}}" alt="Фото автомобиля" width="120">
             </td>
             <td>
                 <a th:href="@{/posts/{postId}(postId=${post.id})}" th:text="${post.title}">Toyota Camry</a>

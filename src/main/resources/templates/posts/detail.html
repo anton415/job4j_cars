@@ -35,8 +35,8 @@
         <a th:if="${currentUser != null}" th:href="@{/posts/create}">Создать объявление</a>
         <a th:if="${currentUser == null}" th:href="@{/users/login}">Войти, чтобы создать объявление</a>
     </p>
-    <div th:if="${post.photoPath != null}">
-        <img th:src="${post.photoPath}" alt="Фото автомобиля" width="320">
+    <div th:if="${!#strings.isEmpty(post.photoPath)}">
+        <img th:src="@{${post.photoPath}}" alt="Фото автомобиля" width="320">
     </div>
     <h2>Описание</h2>
     <p th:text="${post.description}">Описание автомобиля</p>

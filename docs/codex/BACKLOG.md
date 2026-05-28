@@ -22,7 +22,7 @@
 
 - [x] Task 07: Implement post list and detail pages.
 - [x] Task 08: Implement create post flow with car fields.
-- [ ] Task 09: Implement photo upload and image display.
+- [x] Task 09: Implement photo upload and image display.
 - [ ] Task 10: Implement sold/not sold status change with author-only rule.
 
 ## Milestone 5 — Quality and delivery
