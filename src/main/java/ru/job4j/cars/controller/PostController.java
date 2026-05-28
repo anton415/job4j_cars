@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.job4j.cars.model.Car;
 import ru.job4j.cars.model.Post;
 import ru.job4j.cars.model.User;
@@ -93,6 +94,21 @@ public class PostController {
         post.setCar(car);
         Post createdPost = postService.create(post, user);
         return "redirect:/posts/" + createdPost.getId();
+    }
+
+    @PostMapping("/posts/{postId}/status")
+    public String changeStatus(@PathVariable int postId,
+                               @RequestParam boolean sold,
+                               HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+        User user = currentUser(session);
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+        if (!postService.changeSoldStatus(postId, sold, user)) {
+            redirectAttributes.addFlashAttribute("message", "Статус может менять только автор объявления");
+        }
+        return "redirect:/posts/" + postId;
     }
 
     private void addPostForm(Model model, Post post) {

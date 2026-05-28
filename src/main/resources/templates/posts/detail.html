@@ -22,15 +22,19 @@
         <a th:href="@{/posts}">К списку объявлений</a>
     </p>
     <h1 th:text="${post.title}">Toyota Camry</h1>
-    <p>
+    <p th:if="${message != null}" th:text="${message}">Сообщение</p>
+    <div>
         <span th:text="${post.sold ? 'Продан' : 'В продаже'}">В продаже</span>
-        <button th:if="${currentUser != null and currentUser.id == post.user.id}"
-                type="button"
-                disabled
-                th:text="${post.sold ? 'Вернуть в продажу' : 'Отметить проданным'}">
-            Изменить статус
-        </button>
-    </p>
+        <form th:if="${currentUser != null and currentUser.id == post.user.id}"
+              th:action="@{/posts/{postId}/status(postId=${post.id})}"
+              method="post">
+            <input type="hidden" name="sold" th:value="${!post.sold}">
+            <button type="submit"
+                    th:text="${post.sold ? 'Вернуть в продажу' : 'Отметить проданным'}">
+                Изменить статус
+            </button>
+        </form>
+    </div>
     <p>
         <a th:if="${currentUser != null}" th:href="@{/posts/create}">Создать объявление</a>
         <a th:if="${currentUser == null}" th:href="@{/users/login}">Войти, чтобы создать объявление</a>
