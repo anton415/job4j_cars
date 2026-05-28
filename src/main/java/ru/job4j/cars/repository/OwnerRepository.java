@@ -1,15 +1,19 @@
 package ru.job4j.cars.repository;
 
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import ru.job4j.cars.model.Owner;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Component
 public class OwnerRepository {
     private final HibernateRepository hibernateRepository;
 
+    @Autowired
     public OwnerRepository(SessionFactory sf) {
         this(new HibernateRepository(sf));
     }
