@@ -83,7 +83,7 @@ class PostRepositoryTest extends RepositoryTestSupport {
         user.setName(uniqueName("post_user"));
         user.setEmail(uniqueName("post_user") + "@example.com");
         user.setPassword("password");
-        return userRepository.create(user);
+        return userRepository.create(user).orElseThrow();
     }
 
     private Car createCar(String brand) {

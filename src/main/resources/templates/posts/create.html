@@ -26,7 +26,7 @@
     <form th:action="@{/posts/create}" th:object="${post}" method="post" enctype="multipart/form-data">
         <div>
             <label for="title">Название</label>
-            <input type="text" id="title" th:field="*{title}" required>
+            <input type="text" id="title" th:field="*{title}" pattern=".*\S.*" required>
         </div>
         <div>
             <label for="description">Описание</label>
@@ -39,31 +39,55 @@
         <h2>Автомобиль</h2>
         <div>
             <label for="brand">Марка</label>
-            <input type="text" id="brand" th:field="*{car.brand}" required>
+            <select id="brand" th:field="*{brand}" required>
+                <option value="">Выберите марку</option>
+                <option th:each="brand : ${carBrands}" th:value="${brand}" th:text="${brand}"></option>
+            </select>
         </div>
         <div>
             <label for="model">Модель</label>
-            <input type="text" id="model" th:field="*{car.model}" required>
+            <select id="model" th:field="*{model}" required>
+                <option value="">Выберите модель</option>
+                <option th:each="carModel : ${carModels}" th:value="${carModel}" th:text="${carModel}"></option>
+            </select>
         </div>
         <div>
             <label for="year">Год выпуска</label>
-            <input type="number" id="year" th:field="*{car.year}" min="1" required>
+            <select id="year" th:field="*{year}" required>
+                <option value="">Выберите год</option>
+                <option th:each="productionYear : ${productionYears}"
+                        th:value="${productionYear}"
+                        th:text="${productionYear}">
+                </option>
+            </select>
         </div>
         <div>
             <label for="bodyType">Кузов</label>
-            <input type="text" id="bodyType" th:field="*{car.bodyType}" required>
+            <select id="bodyType" th:field="*{bodyType}" required>
+                <option value="">Выберите кузов</option>
+                <option th:each="bodyType : ${bodyTypes}" th:value="${bodyType}" th:text="${bodyType}"></option>
+            </select>
         </div>
         <div>
             <label for="engineType">Двигатель</label>
-            <input type="text" id="engineType" th:field="*{car.engineType}" required>
+            <select id="engineType" th:field="*{engineType}" required>
+                <option value="">Выберите двигатель</option>
+                <option th:each="engineType : ${engineTypes}" th:value="${engineType}" th:text="${engineType}"></option>
+            </select>
         </div>
         <div>
             <label for="transmission">Коробка передач</label>
-            <input type="text" id="transmission" th:field="*{car.transmission}" required>
+            <select id="transmission" th:field="*{transmission}" required>
+                <option value="">Выберите коробку передач</option>
+                <option th:each="transmission : ${transmissions}"
+                        th:value="${transmission}"
+                        th:text="${transmission}">
+                </option>
+            </select>
         </div>
         <div>
             <label for="mileage">Пробег</label>
-            <input type="number" id="mileage" th:field="*{car.mileage}" min="0" required>
+            <input type="number" id="mileage" th:field="*{mileage}" min="0" required>
         </div>
         <div>
             <label for="photo">Фото</label>

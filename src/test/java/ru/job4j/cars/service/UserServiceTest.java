@@ -9,8 +9,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class UserServiceTest {
@@ -25,15 +23,14 @@ class UserServiceTest {
     }
 
     @Test
-    void whenRegisterDuplicateEmailThenEmptyAndUserNotCreated() {
+    void whenRegisterDuplicateEmailThenEmpty() {
         var user = user("new-user@example.com", "password");
-        when(userRepository.findByEmail(user.getEmail()))
-                .thenReturn(Optional.of(user("new-user@example.com", "old-password")));
+        when(userRepository.create(user))
+                .thenReturn(Optional.empty());
 
         var result = userService.register(user);
 
         assertThat(result).isEmpty();
-        verify(userRepository, never()).create(user);
     }
 
     @Test

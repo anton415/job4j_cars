@@ -1,9 +1,9 @@
 package ru.job4j.cars.controller;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +11,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ru.job4j.cars.dto.PostDto;
+import ru.job4j.cars.model.BodyType;
 import ru.job4j.cars.model.Car;
+import ru.job4j.cars.model.CarBrand;
+import ru.job4j.cars.model.CarModel;
+import ru.job4j.cars.model.EngineType;
 import ru.job4j.cars.model.Post;
+import ru.job4j.cars.model.Transmission;
 import ru.job4j.cars.model.User;
 import ru.job4j.cars.service.CarService;
 import ru.job4j.cars.service.PostService;
@@ -21,11 +27,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.Year;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Controller
 public class PostController {
     private static final String UPLOAD_DIR = "uploads";
+    private static final int MIN_PRODUCTION_YEAR = 1970;
 
     private final PostService postService;
 
@@ -42,8 +53,17 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public String list(Model model) {
-        model.addAttribute("posts", postService.findAll());
+    public String list(@RequestParam(name = "bodyType", required = false) String bodyType,
+                       @RequestParam(name = "createdDate", required = false)
+                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdDate,
+                       @RequestParam(name = "withPhoto", defaultValue = "false") boolean withPhoto,
+                       Model model) {
+        bodyType = trim(bodyType);
+        model.addAttribute("posts", postService.findAll(bodyType, createdDate, withPhoto));
+        model.addAttribute("bodyTypes", BodyType.values());
+        model.addAttribute("selectedBodyType", bodyType);
+        model.addAttribute("selectedCreatedDate", createdDate);
+        model.addAttribute("withPhoto", withPhoto);
         return "posts/list";
     }
 
@@ -58,17 +78,13 @@ public class PostController {
     }
 
     @GetMapping("/posts/create")
-    public String createPage(Model model, HttpSession session) {
-        if (currentUser(session) == null) {
-            return "redirect:/users/login";
-        }
-        addPostForm(model, new Post());
+    public String createPage(Model model) {
+        addPostForm(model, new PostDto());
         return "posts/create";
     }
 
     @PostMapping("/posts/create")
-    public String create(@ModelAttribute("post") Post post,
-                         BindingResult bindingResult,
+    public String create(@ModelAttribute("post") PostDto postDto,
                          @RequestParam(name = "photo", required = false) MultipartFile photo,
                          Model model,
                          HttpSession session) {
@@ -76,22 +92,19 @@ public class PostController {
         if (user == null) {
             return "redirect:/users/login";
         }
-        preparePost(post);
-        String error = validatePost(post, bindingResult);
-        if (error != null) {
-            addPostForm(model, post);
-            model.addAttribute("message", error);
-            return "posts/create";
-        }
+        preparePostDto(postDto);
+        String photoPath;
         try {
-            post.setPhotoPath(savePhoto(photo));
+            photoPath = savePhoto(photo);
         } catch (IOException e) {
-            addPostForm(model, post);
+            addPostForm(model, postDto);
             model.addAttribute("message", "Не удалось сохранить фото");
             return "posts/create";
         }
-        Car car = carService.create(post.getCar());
+        Car car = carService.create(toCar(postDto));
+        Post post = toPost(postDto);
         post.setCar(car);
+        post.setPhotoPath(photoPath);
         Post createdPost = postService.create(post, user);
         return "redirect:/posts/" + createdPost.getId();
     }
@@ -111,60 +124,46 @@ public class PostController {
         return "redirect:/posts/" + postId;
     }
 
-    private void addPostForm(Model model, Post post) {
-        preparePost(post);
-        model.addAttribute("post", post);
+    private void addPostForm(Model model, PostDto postDto) {
+        preparePostDto(postDto);
+        model.addAttribute("post", postDto);
+        model.addAttribute("carBrands", CarBrand.values());
+        model.addAttribute("carModels", CarModel.values());
+        model.addAttribute("productionYears", productionYears());
+        model.addAttribute("bodyTypes", BodyType.values());
+        model.addAttribute("engineTypes", EngineType.values());
+        model.addAttribute("transmissions", Transmission.values());
     }
 
-    private void preparePost(Post post) {
-        if (post.getCar() == null) {
-            post.setCar(new Car());
-        }
+    private void preparePostDto(PostDto postDto) {
+        postDto.setTitle(trim(postDto.getTitle()));
+        postDto.setDescription(trim(postDto.getDescription()));
+        postDto.setBrand(trim(postDto.getBrand()));
+        postDto.setModel(trim(postDto.getModel()));
+        postDto.setBodyType(trim(postDto.getBodyType()));
+        postDto.setEngineType(trim(postDto.getEngineType()));
+        postDto.setTransmission(trim(postDto.getTransmission()));
+    }
+
+    private Car toCar(PostDto postDto) {
+        var car = new Car();
+        car.setBrand(postDto.getBrand());
+        car.setModel(postDto.getModel());
+        car.setYear(postDto.getYear());
+        car.setBodyType(postDto.getBodyType());
+        car.setEngineType(postDto.getEngineType());
+        car.setTransmission(postDto.getTransmission());
+        car.setMileage(postDto.getMileage());
+        return car;
+    }
+
+    private Post toPost(PostDto postDto) {
+        var post = new Post();
+        post.setTitle(postDto.getTitle());
+        post.setDescription(postDto.getDescription());
+        post.setPrice(postDto.getPrice());
         post.setSold(false);
-        post.setTitle(trim(post.getTitle()));
-        post.setDescription(trim(post.getDescription()));
-        post.setPhotoPath(null);
-        Car car = post.getCar();
-        car.setBrand(trim(car.getBrand()));
-        car.setModel(trim(car.getModel()));
-        car.setBodyType(trim(car.getBodyType()));
-        car.setEngineType(trim(car.getEngineType()));
-        car.setTransmission(trim(car.getTransmission()));
-    }
-
-    private String validatePost(Post post, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "Проверьте корректность числовых полей";
-        }
-        if (isBlank(post.getTitle())) {
-            return "Укажите название объявления";
-        }
-        if (post.getPrice() == null || post.getPrice().signum() <= 0) {
-            return "Укажите цену больше нуля";
-        }
-        Car car = post.getCar();
-        if (isBlank(car.getBrand())) {
-            return "Укажите марку автомобиля";
-        }
-        if (isBlank(car.getModel())) {
-            return "Укажите модель автомобиля";
-        }
-        if (car.getYear() <= 0) {
-            return "Укажите год выпуска";
-        }
-        if (isBlank(car.getBodyType())) {
-            return "Укажите тип кузова";
-        }
-        if (isBlank(car.getEngineType())) {
-            return "Укажите тип двигателя";
-        }
-        if (isBlank(car.getTransmission())) {
-            return "Укажите коробку передач";
-        }
-        if (car.getMileage() < 0) {
-            return "Пробег не может быть отрицательным";
-        }
-        return null;
+        return post;
     }
 
     private User currentUser(HttpSession session) {
@@ -175,12 +174,15 @@ public class PostController {
         return user;
     }
 
-    private boolean isBlank(String value) {
-        return value == null || value.isBlank();
-    }
-
     private String trim(String value) {
         return value == null ? null : value.trim();
+    }
+
+    private List<Integer> productionYears() {
+        int currentYear = Year.now().getValue();
+        return IntStream.iterate(currentYear, year -> year >= MIN_PRODUCTION_YEAR, year -> year - 1)
+                .boxed()
+                .toList();
     }
 
     private String savePhoto(MultipartFile photo) throws IOException {

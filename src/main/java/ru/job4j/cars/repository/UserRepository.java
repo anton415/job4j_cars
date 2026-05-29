@@ -17,11 +17,15 @@ public class UserRepository {
         this.sf = sf;
     }
 
-    public User create(User user) {
-        return tx(session -> {
-            session.persist(user);
-            return user;
-        });
+    public Optional<User> create(User user) {
+        try {
+            return tx(session -> {
+                session.persist(user);
+                return Optional.of(user);
+            });
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public Optional<User> findById(int userId) {

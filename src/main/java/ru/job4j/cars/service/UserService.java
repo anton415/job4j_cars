@@ -15,10 +15,7 @@ public class UserService {
     }
 
     public Optional<User> register(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return Optional.empty();
-        }
-        return Optional.of(userRepository.create(user));
+        return userRepository.create(user);
     }
 
     public Optional<User> login(String email, String password) {

@@ -24,6 +24,25 @@
         <a th:if="${currentUser != null}" th:href="@{/posts/create}">Создать объявление</a>
         <a th:if="${currentUser == null}" th:href="@{/users/login}">Войти, чтобы создать объявление</a>
     </p>
+    <form th:action="@{/posts}" method="get">
+        <label for="bodyType">Кузов</label>
+        <select id="bodyType" name="bodyType">
+            <option value="">Все</option>
+            <option th:each="bodyType : ${bodyTypes}"
+                    th:value="${bodyType}"
+                    th:text="${bodyType}"
+                    th:selected="${selectedBodyType == bodyType.toString()}">
+            </option>
+        </select>
+        <label for="createdDate">Дата подачи</label>
+        <input type="date" id="createdDate" name="createdDate" th:value="${selectedCreatedDate}">
+        <label>
+            <input type="checkbox" name="withPhoto" value="true" th:checked="${withPhoto}">
+            С фото
+        </label>
+        <button type="submit">Показать</button>
+        <a th:href="@{/posts}">Сбросить</a>
+    </form>
     <p th:if="${posts.isEmpty()}">Объявлений пока нет.</p>
     <table th:if="${!posts.isEmpty()}" border="1">
         <thead>

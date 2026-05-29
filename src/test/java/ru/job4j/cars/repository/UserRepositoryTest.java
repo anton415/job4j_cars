@@ -71,13 +71,25 @@ class UserRepositoryTest extends RepositoryTestSupport {
         assertThat(repository.findByEmailAndPassword(email, "wrong")).isEmpty();
     }
 
+    @Test
+    @DisplayName("Create returns empty when email already exists")
+    void whenCreateDuplicateEmailThenEmpty() {
+        var email = uniqueEmail();
+        createUser(uniqueName(), email, "password");
+        var user = new User();
+        user.setName(uniqueName());
+        user.setEmail(email);
+        user.setPassword("password");
+
+        assertThat(repository.create(user)).isEmpty();
+    }
+
     private User createUser(String name, String email, String password) {
         var user = new User();
         user.setName(name);
         user.setEmail(email);
         user.setPassword(password);
-        repository.create(user);
-        return repository.findByEmail(email).orElseThrow();
+        return repository.create(user).orElseThrow();
     }
 
     private String uniqueName() {

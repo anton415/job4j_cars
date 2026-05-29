@@ -5,6 +5,7 @@ import ru.job4j.cars.model.Post;
 import ru.job4j.cars.model.User;
 import ru.job4j.cars.repository.PostRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +19,10 @@ public class PostService {
 
     public List<Post> findAll() {
         return postRepository.findAll();
+    }
+
+    public List<Post> findAll(String bodyType, LocalDate createdDate, boolean withPhoto) {
+        return postRepository.findAll(bodyType, createdDate, withPhoto);
     }
 
     public Optional<Post> findById(int postId) {
